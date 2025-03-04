@@ -1,0 +1,45 @@
+﻿
+@{
+    ViewData["Title"] = "CalendarView";
+    int year = DateTime.Now.Year;
+    int month = DateTime.Now.Month;
+    DateTime firstDayOfMonth = new DateTime(year, month, 1);
+    int daysInMonth = DateTime.DaysInMonth(year, month);
+    int startDay = (int)firstDayOfMonth.DayOfWeek;
+    if (startDay == 0) startDay = 7; // Niedziela ->
+}
+
+<h1>CalendarView</h1>
+
+<div class="container">
+    <h2 class="text-center mt-4">Calendar @month/@year</h2>
+    <div class="row g-2 mt-3">
+        <div class="col text-center fw-bold">Monday</div>
+        <div class="col text-center fw-bold">Tuesday</div>
+        <div class="col text-center fw-bold">Wednesday</div>
+        <div class="col text-center fw-bold">Thursday</div>
+        <div class="col text-center fw-bold">Friday</div>
+        <div class="col text-center fw-bold">Saturday</div>
+        <div class="col text-center fw-bold">Sunday</div>
+    </div>
+    @{
+        int dayCounter = 1;
+        for (int row = 0; row < 6 && dayCounter <= daysInMonth; row++)
+        {
+            <div class="row g-2">
+                @for (int col = 1; col <= 7; col++)
+                {
+                    if ((row == 0 && col < startDay) || dayCounter > daysInMonth)
+                    {
+                        <div class="col border bg-light text-center p-3"></div>
+                    }
+                    else
+                    {
+                        <div class="col border bg-light text-center p-3">@dayCounter</div>
+                        dayCounter++;
+                    }
+                }
+            </div>
+        }
+    }
+</div>

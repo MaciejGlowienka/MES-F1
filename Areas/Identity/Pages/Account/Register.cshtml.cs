@@ -112,7 +112,7 @@ namespace MES_F1.Areas.Identity.Pages.Account
             [Display(Name = "Surname")]
             public string Surname { get; set; }
 
-            public string? Role { get; set; }
+            public string Role { get; set; }
             [ValidateNever]
             public IEnumerable<SelectListItem> RoleList { get; set; }
         }
