@@ -10,5 +10,7 @@ namespace MES_F1.Models
 
         public DateTime Birthday { get; set; }
 
+        public ICollection<Worker>? Workers { get; set; }
+
     }
 }

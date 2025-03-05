@@ -1,0 +1,44 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+@model MES_F1.Models.TeamWorkerRoleAssign;
+
+
+<form asp-action="AssignWorkerToTeam" method="post">
+    <div>
+        <label for="TeamId">Zespół:</label>
+        <select name="TeamId" class="form-control" required>
+            <option value="">-- Wybierz zespół --</option>
+            @foreach (var team in ViewBag.Teams)
+            {
+                <option value="@team.TeamId">@team.TeamName</option>
+            }
+        </select>
+    </div>
+
+    <div>
+        <label for="WorkerId">Pracownik:</label>
+        <select name="WorkerId" class="form-control" required>
+            <option value="">-- Wybierz pracownika --</option>
+            @foreach (var worker in ViewBag.Workers)
+            {
+                <option value="@worker.WorkerId">@worker.WorkerName</option>
+            }
+        </select>
+    </div>
+
+    <div>
+        <label for="TeamRoleId">Rola:</label>
+        <select name="TeamRoleId" class="form-control" required>
+            <option value="">-- Wybierz rolę --</option>
+            @foreach (var role in ViewBag.TeamRoles)
+            {
+                <option value="@role.TeamRoleId">@role.RoleDescription</option>
+            }
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Przypisz</button>
+</form>

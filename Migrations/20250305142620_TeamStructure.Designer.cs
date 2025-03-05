@@ -4,6 +4,7 @@ using MES_F1.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MES_F1.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250305142620_TeamStructure")]
+    partial class TeamStructure
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -106,25 +109,9 @@ namespace MES_F1.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TeamId"));
 
-                    b.Property<string>("TeamName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("TeamId");
 
                     b.ToTable("Teams");
-
-                    b.HasData(
-                        new
-                        {
-                            TeamId = 1,
-                            TeamName = "Development Team"
-                        },
-                        new
-                        {
-                            TeamId = 2,
-                            TeamName = "Marketing Team"
-                        });
                 });
 
             modelBuilder.Entity("MES_F1.Models.TeamRole", b =>
@@ -146,26 +133,6 @@ namespace MES_F1.Migrations
                     b.HasKey("TeamRoleId");
 
                     b.ToTable("TeamRoles");
-
-                    b.HasData(
-                        new
-                        {
-                            TeamRoleId = 1,
-                            RoleDescription = "Developer",
-                            RoleName = "Developer"
-                        },
-                        new
-                        {
-                            TeamRoleId = 2,
-                            RoleDescription = "Manager",
-                            RoleName = "Manager"
-                        },
-                        new
-                        {
-                            TeamRoleId = 3,
-                            RoleDescription = "Marketing Specialist",
-                            RoleName = "Marketing Specialist"
-                        });
                 });
 
             modelBuilder.Entity("MES_F1.Models.TeamWorkerRoleAssign", b =>
@@ -205,34 +172,14 @@ namespace MES_F1.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("WorkerId"));
 
                     b.Property<string>("AccountId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("WorkerName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("WorkerId");
 
                     b.HasIndex("AccountId");
 
                     b.ToTable("Workers");
-
-                    b.HasData(
-                        new
-                        {
-                            WorkerId = 1,
-                            WorkerName = "John Doe"
-                        },
-                        new
-                        {
-                            WorkerId = 2,
-                            WorkerName = "Jane Smith"
-                        },
-                        new
-                        {
-                            WorkerId = 3,
-                            WorkerName = "Alice Johnson"
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -400,7 +347,8 @@ namespace MES_F1.Migrations
                     b.HasOne("MES_F1.Models.ApplicationUser", "User")
                         .WithMany("Workers")
                         .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });

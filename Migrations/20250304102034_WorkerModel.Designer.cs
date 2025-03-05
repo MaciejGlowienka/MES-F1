@@ -4,6 +4,7 @@ using MES_F1.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MES_F1.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250304102034_WorkerModel")]
+    partial class WorkerModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -98,141 +101,23 @@ namespace MES_F1.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("MES_F1.Models.Team", b =>
-                {
-                    b.Property<int>("TeamId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TeamId"));
-
-                    b.Property<string>("TeamName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("TeamId");
-
-                    b.ToTable("Teams");
-
-                    b.HasData(
-                        new
-                        {
-                            TeamId = 1,
-                            TeamName = "Development Team"
-                        },
-                        new
-                        {
-                            TeamId = 2,
-                            TeamName = "Marketing Team"
-                        });
-                });
-
-            modelBuilder.Entity("MES_F1.Models.TeamRole", b =>
-                {
-                    b.Property<int>("TeamRoleId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TeamRoleId"));
-
-                    b.Property<string>("RoleDescription")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("RoleName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("TeamRoleId");
-
-                    b.ToTable("TeamRoles");
-
-                    b.HasData(
-                        new
-                        {
-                            TeamRoleId = 1,
-                            RoleDescription = "Developer",
-                            RoleName = "Developer"
-                        },
-                        new
-                        {
-                            TeamRoleId = 2,
-                            RoleDescription = "Manager",
-                            RoleName = "Manager"
-                        },
-                        new
-                        {
-                            TeamRoleId = 3,
-                            RoleDescription = "Marketing Specialist",
-                            RoleName = "Marketing Specialist"
-                        });
-                });
-
-            modelBuilder.Entity("MES_F1.Models.TeamWorkerRoleAssign", b =>
-                {
-                    b.Property<int>("TeamWorkerRoleAssignId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TeamWorkerRoleAssignId"));
-
-                    b.Property<int>("TeamId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TeamRoleId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("WorkerId")
-                        .HasColumnType("int");
-
-                    b.HasKey("TeamWorkerRoleAssignId");
-
-                    b.HasIndex("TeamId");
-
-                    b.HasIndex("TeamRoleId");
-
-                    b.HasIndex("WorkerId");
-
-                    b.ToTable("TeamWorkerRoleAssignments");
-                });
-
             modelBuilder.Entity("MES_F1.Models.Worker", b =>
                 {
-                    b.Property<int>("WorkerId")
+                    b.Property<int>("IdWorker")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("WorkerId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdWorker"));
 
-                    b.Property<string>("AccountId")
+                    b.Property<string>("IdAccount")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("WorkerName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.HasKey("IdWorker");
 
-                    b.HasKey("WorkerId");
-
-                    b.HasIndex("AccountId");
+                    b.HasIndex("IdAccount");
 
                     b.ToTable("Workers");
-
-                    b.HasData(
-                        new
-                        {
-                            WorkerId = 1,
-                            WorkerName = "John Doe"
-                        },
-                        new
-                        {
-                            WorkerId = 2,
-                            WorkerName = "Jane Smith"
-                        },
-                        new
-                        {
-                            WorkerId = 3,
-                            WorkerName = "Alice Johnson"
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -368,39 +253,13 @@ namespace MES_F1.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("MES_F1.Models.TeamWorkerRoleAssign", b =>
-                {
-                    b.HasOne("MES_F1.Models.Team", "Team")
-                        .WithMany("TeamWorkerRoleAssignments")
-                        .HasForeignKey("TeamId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("MES_F1.Models.TeamRole", "TeamRole")
-                        .WithMany("TeamWorkerRoleAssignments")
-                        .HasForeignKey("TeamRoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("MES_F1.Models.Worker", "Worker")
-                        .WithMany("TeamWorkerRoleAssignments")
-                        .HasForeignKey("WorkerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Team");
-
-                    b.Navigation("TeamRole");
-
-                    b.Navigation("Worker");
-                });
-
             modelBuilder.Entity("MES_F1.Models.Worker", b =>
                 {
                     b.HasOne("MES_F1.Models.ApplicationUser", "User")
                         .WithMany("Workers")
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("IdAccount")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -459,21 +318,6 @@ namespace MES_F1.Migrations
             modelBuilder.Entity("MES_F1.Models.ApplicationUser", b =>
                 {
                     b.Navigation("Workers");
-                });
-
-            modelBuilder.Entity("MES_F1.Models.Team", b =>
-                {
-                    b.Navigation("TeamWorkerRoleAssignments");
-                });
-
-            modelBuilder.Entity("MES_F1.Models.TeamRole", b =>
-                {
-                    b.Navigation("TeamWorkerRoleAssignments");
-                });
-
-            modelBuilder.Entity("MES_F1.Models.Worker", b =>
-                {
-                    b.Navigation("TeamWorkerRoleAssignments");
                 });
 #pragma warning restore 612, 618
         }
