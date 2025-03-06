@@ -7,11 +7,21 @@ namespace MES_F1.Models
         public int TeamWorkerRoleAssignId { get; set; }
 
         public int TeamId { get; set; }
-        public Team Team { get; set; }
+        public Team? Team { get; set; }
         public int WorkerId { get; set; }
-        public Worker Worker { get; set; }
+        public Worker? Worker { get; set; }
         public int TeamRoleId { get; set; }
-        public TeamRole TeamRole { get; set; }
+        public TeamRole? TeamRole { get; set; }
 
+        public TeamWorkerRoleAssign(int teamId, int workerId, int teamRoleId)
+        {
+            TeamId = teamId;
+            WorkerId = workerId;
+            TeamRoleId = teamRoleId;
+        }
+
+        public TeamWorkerRoleAssign()
+        {
+        }
     }
 }
