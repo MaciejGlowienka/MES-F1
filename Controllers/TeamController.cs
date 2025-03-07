@@ -34,15 +34,14 @@ namespace MES_F1.Controllers
         public IActionResult TeamWorkerAssign(int TeamId, int WorkerId, int TeamRoleId)
         {
 
-            var assign = new TeamWorkerRoleAssign
-            {
-                TeamId = TeamId,
-                WorkerId = WorkerId,
-                TeamRoleId = TeamRoleId
-            };
+            var worker = _context.Workers.FirstOrDefault(w => w.WorkerId == WorkerId);
 
-            _context.TeamWorkerRoleAssignments.Add(assign);
-            int changes = _context.SaveChanges();
+            if (worker != null)
+            {
+                worker.TeamId = TeamId;
+                worker.TeamRoleId = TeamRoleId;
+                _context.SaveChanges();
+            }
 
             return RedirectToAction("TeamAssign");
         }
@@ -66,14 +65,15 @@ namespace MES_F1.Controllers
         [HttpPost]
         public IActionResult RemoveWorkerFromTeam(int TeamId, int WorkerId)
         {
-            var assignment = _context.TeamWorkerRoleAssignments
-                .FirstOrDefault(twra => twra.TeamId == TeamId && twra.WorkerId == WorkerId);
+            var worker = _context.Workers.FirstOrDefault(w => w.WorkerId == WorkerId);
 
-            if (assignment != null)
+            if (worker != null)
             {
-                _context.TeamWorkerRoleAssignments.Remove(assignment);
+                worker.TeamId = null;
+                worker.TeamRoleId = null;
                 _context.SaveChanges();
             }
+
             ViewBag.TeamId = TeamId;
             ViewBag.WorkersWithRoles = GetWorkerWithRoles(TeamId);
 
@@ -82,17 +82,17 @@ namespace MES_F1.Controllers
 
         public object GetWorkerWithRoles(int TeamId)
         {
-            var workersWithRoles = _context.TeamWorkerRoleAssignments
-        .Where(twra => twra.TeamId == TeamId)
-        .Include(twra => twra.Worker)  // Załaduj pracownika
-        .Include(twra => twra.TeamRole) // Załaduj rolę
-        .Select(twra => new
-        {
-            WorkerName = twra.Worker.WorkerName,
-            RoleName = twra.TeamRole.RoleName,
-            WorkerId = twra.Worker.WorkerId
-        })
-        .ToList();
+            var workersWithRoles = _context.Workers
+                   .Where(w => w.TeamId == TeamId)
+                   .Select(w => new
+                   {
+                       WorkerId = w.WorkerId,
+                       WorkerName = w.WorkerName,
+                       RoleId = w.TeamRoleId,
+                       RoleName = w.TeamRole.RoleName
+                   })
+                   .ToList();
+
 
             return workersWithRoles;
         }

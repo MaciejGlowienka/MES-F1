@@ -8,6 +8,6 @@
 
         public string RoleDescription { get; set; }
 
-        public ICollection<TeamWorkerRoleAssign> TeamWorkerRoleAssignments { get; set; }
+
     }
 }

@@ -15,35 +15,30 @@ namespace MES_F1.Data
         public DbSet<Worker> Workers { get; set; }
         public DbSet<Team> Teams { get; set; }
         public DbSet<TeamRole> TeamRoles { get; set; }
-        public DbSet<TeamWorkerRoleAssign> TeamWorkerRoleAssignments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
             builder.Entity<Worker>()
-                .HasOne(p => p.User)
-                .WithMany(u => u.Workers)
-                .HasForeignKey(p => p.AccountId)
+                .HasOne(w => w.User)
+                .WithOne()
+                .HasForeignKey<Worker>(w => w.AccountId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder.Entity<TeamWorkerRoleAssign>()
-            .HasKey(twra => twra.TeamWorkerRoleAssignId);
+            builder.Entity<Worker>()
+                .HasOne(w => w.Team)
+                .WithMany()
+                .HasForeignKey(w => w.TeamId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-            builder.Entity<TeamWorkerRoleAssign>()
-                .HasOne(twra => twra.Team)
-                .WithMany(t => t.TeamWorkerRoleAssignments)
-                .HasForeignKey(twra => twra.TeamId);
+            builder.Entity<Worker>()
+                .HasOne(w => w.TeamRole)
+                .WithMany()
+                .HasForeignKey(w => w.TeamRoleId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-            builder.Entity<TeamWorkerRoleAssign>()
-                .HasOne(twra => twra.Worker)
-                .WithMany(w => w.TeamWorkerRoleAssignments)
-                .HasForeignKey(twra => twra.WorkerId);
-
-            builder.Entity<TeamWorkerRoleAssign>()
-                .HasOne(twra => twra.TeamRole)
-                .WithMany(tr => tr.TeamWorkerRoleAssignments)
-                .HasForeignKey(twra => twra.TeamRoleId);
+            
 
             builder.Entity<Team>().HasData(
             new Team { TeamId = 1, TeamName = "Development Team" },

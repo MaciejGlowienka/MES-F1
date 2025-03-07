@@ -6,7 +6,5 @@
 
         public string TeamName { get; set; }
 
-        public ICollection<TeamWorkerRoleAssign> TeamWorkerRoleAssignments { get; set; }
-
     }
 }
