@@ -3,42 +3,90 @@
 *@
 @{
 }
-@model MES_F1.Models.Worker;
 
+@model MES_F1.Models.Worker
 
-<form asp-action="TeamWorkerAssign" method="post">
+<h2>Wybierz zespół</h2>
+
+<form asp-action="TeamDisplay" method="post">
     <div>
         <label for="TeamId">Zespół:</label>
-        <select name="TeamId" class="form-control" required>
+        <select name="TeamId" class="form-control" required onchange="this.form.submit()">
             <option value="">-- Wybierz zespół --</option>
             @foreach (var team in ViewBag.Teams)
             {
-                <option value="@team.TeamId">@team.TeamName</option>
+                <option value="@team.TeamId" selected="@(ViewBag.TeamId == team.TeamId ? "selected" : null)">
+                    @team.TeamName
+                </option>
             }
         </select>
     </div>
-
-    <div>
-        <label for="WorkerId">Pracownik:</label>
-        <select name="WorkerId" class="form-control" required>
-            <option value="">-- Wybierz pracownika --</option>
-            @foreach (var worker in ViewBag.Workers)
-            {
-                <option value="@worker.WorkerId">@worker.WorkerName</option>
-            }
-        </select>
-    </div>
-
-    <div>
-        <label for="TeamRoleId">Rola:</label>
-        <select name="TeamRoleId" class="form-control" required>
-            <option value="">-- Wybierz rolę --</option>
-            @foreach (var role in ViewBag.TeamRoles)
-            {
-                <option value="@role.TeamRoleId">@role.RoleDescription</option>
-            }
-        </select>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Przypisz</button>
 </form>
+
+@if (ViewBag.TeamId != null)
+{
+    <h2>Pracownicy w zespole @ViewBag.TeamId</h2>
+
+    @if (ViewBag.WorkersWithRoles != null && ViewBag.WorkersWithRoles.Count > 0)
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Imię i nazwisko</th>
+                    <th>Rola w zespole</th>
+                    <th>Akcja</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var worker in ViewBag.WorkersWithRoles)
+                {
+                    <tr>
+                        <td>@worker.WorkerName</td>
+                        <td>@worker.RoleName</td>
+                        <td>
+                            <form asp-action="RemoveWorkerFromTeam" method="post">
+                                <input type="hidden" name="TeamId" value="@ViewBag.TeamId" />
+                                <input type="hidden" name="WorkerId" value="@worker.WorkerId" />
+                                <button type="submit" class="btn btn-danger btn-sm">Usuń</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>Brak przypisanych pracowników do tego zespołu.</p>
+    }
+
+    <h3>Dodaj nowego pracownika do zespołu</h3>
+
+    <form asp-action="TeamWorkerAssign" method="post">
+        <input type="hidden" name="TeamId" value="@ViewBag.TeamId" />
+
+        <div>
+            <label for="WorkerId">Pracownik:</label>
+            <select name="WorkerId" class="form-control" required>
+                <option value="">-- Wybierz pracownika --</option>
+                @foreach (var worker in ViewBag.Workers)
+                {
+                    <option value="@worker.WorkerId">@worker.WorkerName</option>
+                }
+            </select>
+        </div>
+
+        <div>
+            <label for="TeamRoleId">Rola:</label>
+            <select name="TeamRoleId" class="form-control" required>
+                <option value="">-- Wybierz rolę --</option>
+                @foreach (var role in ViewBag.TeamRoles)
+                {
+                    <option value="@role.TeamRoleId">@role.RoleDescription</option>
+                }
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Przypisz</button>
+    </form>
+}
