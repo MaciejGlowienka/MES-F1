@@ -15,6 +15,11 @@ namespace MES_F1.Data
         public DbSet<Worker> Workers { get; set; }
         public DbSet<Team> Teams { get; set; }
         public DbSet<TeamRole> TeamRoles { get; set; }
+        public DbSet<Production> Productions { get; set; }
+        public DbSet<ProductionTask> ProductionTasks { get; set; }
+        public DbSet<Instruction> Instructions { get; set; }
+        public DbSet<Machine> Machines { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -38,7 +43,36 @@ namespace MES_F1.Data
                 .HasForeignKey(w => w.TeamRoleId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            
+            builder.Entity<Machine>()
+               .Property(m => m.Status)
+               .HasConversion<string>() 
+               .HasMaxLength(15)
+               .IsRequired();
+
+            builder.Entity<Production>()
+                .HasOne(w => w.Instruction)
+                .WithMany()
+                .HasForeignKey(w => w.InstructionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<ProductionTask>()
+                .HasOne(w => w.Production)
+                .WithMany()
+                .HasForeignKey(w => w.ProductionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<ProductionTask>()
+                .HasOne(w => w.Machine)
+                .WithMany()
+                .HasForeignKey(w => w.MachineId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<ProductionTask>()
+                .HasOne(w => w.Team)
+                .WithMany()
+                .HasForeignKey(w => w.TeamId)
+                .OnDelete(DeleteBehavior.Cascade);
+
 
             builder.Entity<Team>().HasData(
             new Team { TeamId = 1, TeamName = "Development Team" },
