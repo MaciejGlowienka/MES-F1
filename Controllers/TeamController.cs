@@ -87,6 +87,21 @@ namespace MES_F1.Controllers
                             })
                             .ToList();
         }
+        
+        public IActionResult CreateTeam()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult CreateTeam(string TeamName, WorkScope TeamWorkScope)
+        {
+            var team = new Team(TeamName, TeamWorkScope);
+            _context.Teams.Add(team);
+            _context.SaveChanges();
+
+            return RedirectToAction("TeamAssign");
+        }
 
     }
 }

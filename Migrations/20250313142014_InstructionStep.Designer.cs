@@ -4,6 +4,7 @@ using MES_F1.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MES_F1.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250313142014_InstructionStep")]
+    partial class InstructionStep
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -251,11 +254,6 @@ namespace MES_F1.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("TeamWorkScope")
-                        .IsRequired()
-                        .HasMaxLength(15)
-                        .HasColumnType("nvarchar(15)");
-
                     b.HasKey("TeamId");
 
                     b.ToTable("Teams");
@@ -264,14 +262,12 @@ namespace MES_F1.Migrations
                         new
                         {
                             TeamId = 1,
-                            TeamName = "Development Team",
-                            TeamWorkScope = "None"
+                            TeamName = "Development Team"
                         },
                         new
                         {
                             TeamId = 2,
-                            TeamName = "Marketing Team",
-                            TeamWorkScope = "None"
+                            TeamName = "Marketing Team"
                         });
                 });
 

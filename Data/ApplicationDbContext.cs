@@ -49,6 +49,18 @@ namespace MES_F1.Data
                .HasMaxLength(15)
                .IsRequired();
 
+            builder.Entity<InstructionSteps>()
+                .Property(w => w.StepWorkScope)
+                .HasConversion<string>()
+                .HasMaxLength(15)
+                .IsRequired();
+
+            builder.Entity<Team>()
+                .Property(w => w.TeamWorkScope)
+                .HasConversion<string>()
+                .HasMaxLength(15)
+                .IsRequired();
+
             builder.Entity<Production>()
                 .HasOne(w => w.Instruction)
                 .WithMany()
@@ -73,11 +85,12 @@ namespace MES_F1.Data
                 .HasForeignKey(w => w.TeamId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            builder.Entity<InstructionSteps>()
+                .HasOne(w => w.Instruction)
+                .WithMany()
+                .HasForeignKey(w => w.InstructionId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-            builder.Entity<Team>().HasData(
-            new Team { TeamId = 1, TeamName = "Development Team" },
-            new Team { TeamId = 2, TeamName = "Marketing Team" }
-);
 
             builder.Entity<Worker>().HasData(
                 new Worker { WorkerId = 1, WorkerName = "John Doe" },

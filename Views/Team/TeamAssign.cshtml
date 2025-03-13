@@ -23,9 +23,18 @@
     </div>
 </form>
 
+
+
+    <div>
+        <a asp-action="CreateTeam" class="btn btn-primary">Create New Team</a>
+    </div>
+
+
+
 @if (ViewBag.TeamId != null)
 {
     <h2>Pracownicy w zespole @ViewBag.TeamId</h2>
+    <h2>Work Scope @ViewBag.TeamWorkScope</h2>
 
     @if (ViewBag.WorkersWithRoles != null && ViewBag.WorkersWithRoles.Count > 0)
     {
