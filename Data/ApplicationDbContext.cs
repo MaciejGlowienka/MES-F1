@@ -91,6 +91,36 @@ namespace MES_F1.Data
                 .HasForeignKey(w => w.InstructionId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            builder.Entity<Parts>()
+                .HasOne(w => w.Production)
+                .WithMany()
+                .HasForeignKey(w => w.ProductionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<MaterialLocation>()
+                .HasOne(w => w.Material)
+                .WithMany()
+                .HasForeignKey(w => w.MaterialId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<MaterialLocation>()
+                .HasOne(w => w.WarehouseSpot)
+                .WithMany()
+                .HasForeignKey(w => w.WarehouseSpotId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<PartLocation>()
+                .HasOne(w => w.Part)
+                .WithMany()
+                .HasForeignKey(w => w.PartId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<PartLocation>()
+                .HasOne(w => w.WarehouseSpot)
+                .WithMany()
+                .HasForeignKey(w => w.WarehouseSpotId)
+                .OnDelete(DeleteBehavior.Cascade);
+
 
             builder.Entity<Worker>().HasData(
                 new Worker { WorkerId = 1, WorkerName = "John Doe" },

@@ -96,9 +96,12 @@ namespace MES_F1.Controllers
         [HttpPost]
         public IActionResult CreateTeam(string TeamName, WorkScope TeamWorkScope)
         {
-            var team = new Team(TeamName, TeamWorkScope);
-            _context.Teams.Add(team);
-            _context.SaveChanges();
+            if (TeamName != null || TeamWorkScope != null) 
+            {
+                var team = new Team(TeamName, TeamWorkScope);
+                _context.Teams.Add(team);
+                _context.SaveChanges();
+            }
 
             return RedirectToAction("TeamAssign");
         }
