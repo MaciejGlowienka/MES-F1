@@ -104,14 +104,17 @@ namespace MES_F1.Areas.Identity.Pages.Account
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; }
 
+            [Required]
             [DataType(DataType.Text)]
             [Display(Name = "Name")]
             public string Name { get; set; }
 
+            [Required]
             [DataType(DataType.Text)]
             [Display(Name = "Surname")]
             public string Surname { get; set; }
 
+            [Required]
             public string Role { get; set; }
             [ValidateNever]
             public IEnumerable<SelectListItem> RoleList { get; set; }
