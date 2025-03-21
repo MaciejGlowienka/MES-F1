@@ -17,5 +17,9 @@ namespace MES_F1.Models
         [Description("Additive Finishing")] AdditiveFinishing = 5,
 
         [Description("Painting")] Painting = 6,
+
+        [Description("Operating Machines")] OperatingMachines = 7,
+
+        [Description("Welding")] Welding = 8,
     }
 }

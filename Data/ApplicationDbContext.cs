@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using MES_F1.Models;
 using System.Reflection.Emit;
+using Humanizer;
 
 namespace MES_F1.Data
 {
@@ -51,6 +52,12 @@ namespace MES_F1.Data
 
             builder.Entity<InstructionSteps>()
                 .Property(w => w.StepWorkScope)
+                .HasConversion<string>()
+                .HasMaxLength(25)
+                .IsRequired();
+
+            builder.Entity<Instruction>()
+                .Property(w => w.InstructionPartType)
                 .HasConversion<string>()
                 .HasMaxLength(15)
                 .IsRequired();
@@ -121,6 +128,8 @@ namespace MES_F1.Data
                 .HasForeignKey(w => w.WarehouseSpotId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            
+
 
             builder.Entity<Worker>().HasData(
                 new Worker { WorkerId = 1, WorkerName = "John Doe" },
@@ -133,6 +142,37 @@ namespace MES_F1.Data
                 new TeamRole { TeamRoleId = 2, RoleName = "Manager", RoleDescription = "Manager" },
                 new TeamRole { TeamRoleId = 3, RoleName = "Marketing Specialist", RoleDescription = "Marketing Specialist" }
             );
+
+            builder.Entity<Instruction>().HasData(
+                new Instruction { InstructionId = 1, InstructionName = "Front Wing 2025 mid v.1.0", InstructionPartType = PartType.FrontWing },
+                new Instruction { InstructionId = 2, InstructionName = "Front Wing 2025 low v.1.0", InstructionPartType = PartType.FrontWing },
+                new Instruction { InstructionId = 3, InstructionName = "Front Wing 2025 high v.1.0", InstructionPartType = PartType.FrontWing },
+                new Instruction { InstructionId = 4, InstructionName = "Front Wing 2025 mid v.1.1", InstructionPartType = PartType.FrontWing },
+                new Instruction { InstructionId = 5, InstructionName = "Right Sidepod Cooling pipe 2025 v.1.0", InstructionPartType = PartType.CoolingPipe },
+                new Instruction { InstructionId = 6, InstructionName = "MGU-K Radiator 2025 v.1.0", InstructionPartType = PartType.Radiator }
+                );
+
+            builder.Entity<InstructionSteps>().HasData(
+                new InstructionSteps { InstructionStepId = 1, InstructionId = 1, InstructionStepNumber = 1, InstructionStepDescription = "Laying layers of carbon fiber", StepWorkScope = WorkScope.CompositeLaying },
+                new InstructionSteps { InstructionStepId = 2, InstructionId = 1, InstructionStepNumber = 2, InstructionStepDescription = "Hardening carbon fiber inside an autoclave", StepWorkScope = WorkScope.OperatingMachines },
+                new InstructionSteps { InstructionStepId = 3, InstructionId = 1, InstructionStepNumber = 3, InstructionStepDescription = "Paintjob", StepWorkScope = WorkScope.Painting },
+                new InstructionSteps { InstructionStepId = 4, InstructionId = 2, InstructionStepNumber = 1, InstructionStepDescription = "Laying layers of carbon fiber", StepWorkScope = WorkScope.CompositeLaying },
+                new InstructionSteps { InstructionStepId = 5, InstructionId = 2, InstructionStepNumber = 2, InstructionStepDescription = "Hardening carbon fiber inside an autoclave", StepWorkScope = WorkScope.OperatingMachines },
+                new InstructionSteps { InstructionStepId = 6, InstructionId = 2, InstructionStepNumber = 3, InstructionStepDescription = "Paintjob", StepWorkScope = WorkScope.Painting },
+                new InstructionSteps { InstructionStepId = 7, InstructionId = 3, InstructionStepNumber = 1, InstructionStepDescription = "Laying layers of carbon fiber", StepWorkScope = WorkScope.CompositeLaying },
+                new InstructionSteps { InstructionStepId = 8, InstructionId = 3, InstructionStepNumber = 2, InstructionStepDescription = "Hardening carbon fiber inside an autoclave", StepWorkScope = WorkScope.OperatingMachines },
+                new InstructionSteps { InstructionStepId = 9, InstructionId = 3, InstructionStepNumber = 3, InstructionStepDescription = "Paintjob", StepWorkScope = WorkScope.Painting },
+                new InstructionSteps { InstructionStepId = 10, InstructionId = 4, InstructionStepNumber = 1, InstructionStepDescription = "Laying layers of carbon fiber", StepWorkScope = WorkScope.CompositeLaying },
+                new InstructionSteps { InstructionStepId = 11, InstructionId = 4, InstructionStepNumber = 2, InstructionStepDescription = "Hardening carbon fiber inside an autoclave", StepWorkScope = WorkScope.OperatingMachines },
+                new InstructionSteps { InstructionStepId = 12, InstructionId = 4, InstructionStepNumber = 3, InstructionStepDescription = "Paintjob", StepWorkScope = WorkScope.Painting },
+                new InstructionSteps { InstructionStepId = 13, InstructionId = 5, InstructionStepNumber = 1, InstructionStepDescription = "Cutting set of metal parts", StepWorkScope = WorkScope.MetalForming },
+                new InstructionSteps { InstructionStepId = 14, InstructionId = 5, InstructionStepNumber = 2, InstructionStepDescription = "Welding pipes", StepWorkScope = WorkScope.Welding },
+                new InstructionSteps { InstructionStepId = 15, InstructionId = 5, InstructionStepNumber = 3, InstructionStepDescription = "Grinding and blending a weld", StepWorkScope = WorkScope.Welding },
+                new InstructionSteps { InstructionStepId = 16, InstructionId = 6, InstructionStepNumber = 1, InstructionStepDescription = "Cutting set of metal parts", StepWorkScope = WorkScope.MetalForming },
+                new InstructionSteps { InstructionStepId = 17, InstructionId = 6, InstructionStepNumber = 2, InstructionStepDescription = "Welding radiator plates", StepWorkScope = WorkScope.Welding },
+                new InstructionSteps { InstructionStepId = 18, InstructionId = 6, InstructionStepNumber = 3, InstructionStepDescription = "Grinding and blending a weld", StepWorkScope = WorkScope.Welding }
+                );
+
         }
     }
 }

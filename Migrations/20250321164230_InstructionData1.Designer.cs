@@ -4,6 +4,7 @@ using MES_F1.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MES_F1.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250321164230_InstructionData1")]
+    partial class InstructionData1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -179,160 +182,14 @@ namespace MES_F1.Migrations
 
                     b.Property<string>("StepWorkScope")
                         .IsRequired()
-                        .HasMaxLength(25)
-                        .HasColumnType("nvarchar(25)");
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)");
 
                     b.HasKey("InstructionStepId");
 
                     b.HasIndex("InstructionId");
 
                     b.ToTable("InstructionSteps");
-
-                    b.HasData(
-                        new
-                        {
-                            InstructionStepId = 1,
-                            InstructionId = 1,
-                            InstructionStepDescription = "Laying layers of carbon fiber",
-                            InstructionStepNumber = 1,
-                            StepWorkScope = "CompositeLaying"
-                        },
-                        new
-                        {
-                            InstructionStepId = 2,
-                            InstructionId = 1,
-                            InstructionStepDescription = "Hardening carbon fiber inside an autoclave",
-                            InstructionStepNumber = 2,
-                            StepWorkScope = "OperatingMachines"
-                        },
-                        new
-                        {
-                            InstructionStepId = 3,
-                            InstructionId = 1,
-                            InstructionStepDescription = "Paintjob",
-                            InstructionStepNumber = 3,
-                            StepWorkScope = "Painting"
-                        },
-                        new
-                        {
-                            InstructionStepId = 4,
-                            InstructionId = 2,
-                            InstructionStepDescription = "Laying layers of carbon fiber",
-                            InstructionStepNumber = 1,
-                            StepWorkScope = "CompositeLaying"
-                        },
-                        new
-                        {
-                            InstructionStepId = 5,
-                            InstructionId = 2,
-                            InstructionStepDescription = "Hardening carbon fiber inside an autoclave",
-                            InstructionStepNumber = 2,
-                            StepWorkScope = "OperatingMachines"
-                        },
-                        new
-                        {
-                            InstructionStepId = 6,
-                            InstructionId = 2,
-                            InstructionStepDescription = "Paintjob",
-                            InstructionStepNumber = 3,
-                            StepWorkScope = "Painting"
-                        },
-                        new
-                        {
-                            InstructionStepId = 7,
-                            InstructionId = 3,
-                            InstructionStepDescription = "Laying layers of carbon fiber",
-                            InstructionStepNumber = 1,
-                            StepWorkScope = "CompositeLaying"
-                        },
-                        new
-                        {
-                            InstructionStepId = 8,
-                            InstructionId = 3,
-                            InstructionStepDescription = "Hardening carbon fiber inside an autoclave",
-                            InstructionStepNumber = 2,
-                            StepWorkScope = "OperatingMachines"
-                        },
-                        new
-                        {
-                            InstructionStepId = 9,
-                            InstructionId = 3,
-                            InstructionStepDescription = "Paintjob",
-                            InstructionStepNumber = 3,
-                            StepWorkScope = "Painting"
-                        },
-                        new
-                        {
-                            InstructionStepId = 10,
-                            InstructionId = 4,
-                            InstructionStepDescription = "Laying layers of carbon fiber",
-                            InstructionStepNumber = 1,
-                            StepWorkScope = "CompositeLaying"
-                        },
-                        new
-                        {
-                            InstructionStepId = 11,
-                            InstructionId = 4,
-                            InstructionStepDescription = "Hardening carbon fiber inside an autoclave",
-                            InstructionStepNumber = 2,
-                            StepWorkScope = "OperatingMachines"
-                        },
-                        new
-                        {
-                            InstructionStepId = 12,
-                            InstructionId = 4,
-                            InstructionStepDescription = "Paintjob",
-                            InstructionStepNumber = 3,
-                            StepWorkScope = "Painting"
-                        },
-                        new
-                        {
-                            InstructionStepId = 13,
-                            InstructionId = 5,
-                            InstructionStepDescription = "Cutting set of metal parts",
-                            InstructionStepNumber = 1,
-                            StepWorkScope = "MetalForming"
-                        },
-                        new
-                        {
-                            InstructionStepId = 14,
-                            InstructionId = 5,
-                            InstructionStepDescription = "Welding pipes",
-                            InstructionStepNumber = 2,
-                            StepWorkScope = "Welding"
-                        },
-                        new
-                        {
-                            InstructionStepId = 15,
-                            InstructionId = 5,
-                            InstructionStepDescription = "Grinding and blending a weld",
-                            InstructionStepNumber = 3,
-                            StepWorkScope = "Welding"
-                        },
-                        new
-                        {
-                            InstructionStepId = 16,
-                            InstructionId = 6,
-                            InstructionStepDescription = "Cutting set of metal parts",
-                            InstructionStepNumber = 1,
-                            StepWorkScope = "MetalForming"
-                        },
-                        new
-                        {
-                            InstructionStepId = 17,
-                            InstructionId = 6,
-                            InstructionStepDescription = "Welding radiator plates",
-                            InstructionStepNumber = 2,
-                            StepWorkScope = "Welding"
-                        },
-                        new
-                        {
-                            InstructionStepId = 18,
-                            InstructionId = 6,
-                            InstructionStepDescription = "Grinding and blending a weld",
-                            InstructionStepNumber = 3,
-                            StepWorkScope = "Welding"
-                        });
                 });
 
             modelBuilder.Entity("MES_F1.Models.Machine", b =>

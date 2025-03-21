@@ -4,6 +4,7 @@ using MES_F1.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MES_F1.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250321170045_InstructionData2")]
+    partial class InstructionData2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -177,10 +180,8 @@ namespace MES_F1.Migrations
                     b.Property<int>("InstructionStepNumber")
                         .HasColumnType("int");
 
-                    b.Property<string>("StepWorkScope")
-                        .IsRequired()
-                        .HasMaxLength(25)
-                        .HasColumnType("nvarchar(25)");
+                    b.Property<int>("StepWorkScope")
+                        .HasColumnType("int");
 
                     b.HasKey("InstructionStepId");
 
@@ -195,7 +196,7 @@ namespace MES_F1.Migrations
                             InstructionId = 1,
                             InstructionStepDescription = "Laying layers of carbon fiber",
                             InstructionStepNumber = 1,
-                            StepWorkScope = "CompositeLaying"
+                            StepWorkScope = 3
                         },
                         new
                         {
@@ -203,7 +204,7 @@ namespace MES_F1.Migrations
                             InstructionId = 1,
                             InstructionStepDescription = "Hardening carbon fiber inside an autoclave",
                             InstructionStepNumber = 2,
-                            StepWorkScope = "OperatingMachines"
+                            StepWorkScope = 7
                         },
                         new
                         {
@@ -211,7 +212,7 @@ namespace MES_F1.Migrations
                             InstructionId = 1,
                             InstructionStepDescription = "Paintjob",
                             InstructionStepNumber = 3,
-                            StepWorkScope = "Painting"
+                            StepWorkScope = 6
                         },
                         new
                         {
@@ -219,7 +220,7 @@ namespace MES_F1.Migrations
                             InstructionId = 2,
                             InstructionStepDescription = "Laying layers of carbon fiber",
                             InstructionStepNumber = 1,
-                            StepWorkScope = "CompositeLaying"
+                            StepWorkScope = 3
                         },
                         new
                         {
@@ -227,7 +228,7 @@ namespace MES_F1.Migrations
                             InstructionId = 2,
                             InstructionStepDescription = "Hardening carbon fiber inside an autoclave",
                             InstructionStepNumber = 2,
-                            StepWorkScope = "OperatingMachines"
+                            StepWorkScope = 7
                         },
                         new
                         {
@@ -235,7 +236,7 @@ namespace MES_F1.Migrations
                             InstructionId = 2,
                             InstructionStepDescription = "Paintjob",
                             InstructionStepNumber = 3,
-                            StepWorkScope = "Painting"
+                            StepWorkScope = 6
                         },
                         new
                         {
@@ -243,7 +244,7 @@ namespace MES_F1.Migrations
                             InstructionId = 3,
                             InstructionStepDescription = "Laying layers of carbon fiber",
                             InstructionStepNumber = 1,
-                            StepWorkScope = "CompositeLaying"
+                            StepWorkScope = 3
                         },
                         new
                         {
@@ -251,7 +252,7 @@ namespace MES_F1.Migrations
                             InstructionId = 3,
                             InstructionStepDescription = "Hardening carbon fiber inside an autoclave",
                             InstructionStepNumber = 2,
-                            StepWorkScope = "OperatingMachines"
+                            StepWorkScope = 7
                         },
                         new
                         {
@@ -259,7 +260,7 @@ namespace MES_F1.Migrations
                             InstructionId = 3,
                             InstructionStepDescription = "Paintjob",
                             InstructionStepNumber = 3,
-                            StepWorkScope = "Painting"
+                            StepWorkScope = 6
                         },
                         new
                         {
@@ -267,7 +268,7 @@ namespace MES_F1.Migrations
                             InstructionId = 4,
                             InstructionStepDescription = "Laying layers of carbon fiber",
                             InstructionStepNumber = 1,
-                            StepWorkScope = "CompositeLaying"
+                            StepWorkScope = 3
                         },
                         new
                         {
@@ -275,7 +276,7 @@ namespace MES_F1.Migrations
                             InstructionId = 4,
                             InstructionStepDescription = "Hardening carbon fiber inside an autoclave",
                             InstructionStepNumber = 2,
-                            StepWorkScope = "OperatingMachines"
+                            StepWorkScope = 7
                         },
                         new
                         {
@@ -283,7 +284,7 @@ namespace MES_F1.Migrations
                             InstructionId = 4,
                             InstructionStepDescription = "Paintjob",
                             InstructionStepNumber = 3,
-                            StepWorkScope = "Painting"
+                            StepWorkScope = 6
                         },
                         new
                         {
@@ -291,7 +292,7 @@ namespace MES_F1.Migrations
                             InstructionId = 5,
                             InstructionStepDescription = "Cutting set of metal parts",
                             InstructionStepNumber = 1,
-                            StepWorkScope = "MetalForming"
+                            StepWorkScope = 1
                         },
                         new
                         {
@@ -299,7 +300,7 @@ namespace MES_F1.Migrations
                             InstructionId = 5,
                             InstructionStepDescription = "Welding pipes",
                             InstructionStepNumber = 2,
-                            StepWorkScope = "Welding"
+                            StepWorkScope = 8
                         },
                         new
                         {
@@ -307,7 +308,7 @@ namespace MES_F1.Migrations
                             InstructionId = 5,
                             InstructionStepDescription = "Grinding and blending a weld",
                             InstructionStepNumber = 3,
-                            StepWorkScope = "Welding"
+                            StepWorkScope = 8
                         },
                         new
                         {
@@ -315,7 +316,7 @@ namespace MES_F1.Migrations
                             InstructionId = 6,
                             InstructionStepDescription = "Cutting set of metal parts",
                             InstructionStepNumber = 1,
-                            StepWorkScope = "MetalForming"
+                            StepWorkScope = 1
                         },
                         new
                         {
@@ -323,7 +324,7 @@ namespace MES_F1.Migrations
                             InstructionId = 6,
                             InstructionStepDescription = "Welding radiator plates",
                             InstructionStepNumber = 2,
-                            StepWorkScope = "Welding"
+                            StepWorkScope = 8
                         },
                         new
                         {
@@ -331,7 +332,7 @@ namespace MES_F1.Migrations
                             InstructionId = 6,
                             InstructionStepDescription = "Grinding and blending a weld",
                             InstructionStepNumber = 3,
-                            StepWorkScope = "Welding"
+                            StepWorkScope = 8
                         });
                 });
 
