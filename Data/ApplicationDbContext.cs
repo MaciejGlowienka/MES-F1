@@ -19,6 +19,7 @@ namespace MES_F1.Data
         public DbSet<Production> Productions { get; set; }
         public DbSet<ProductionTask> ProductionTasks { get; set; }
         public DbSet<Instruction> Instructions { get; set; }
+        public DbSet<InstructionSteps> InstructionSteps { get; set; }
         public DbSet<Machine> Machines { get; set; }
 
 

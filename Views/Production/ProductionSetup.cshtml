@@ -5,3 +5,48 @@
 }
 
 @* TODO Strona z inicjacją produkcji części. Przypisanie poszczególnych zadań zespołom i ustawienie tego w terminarzu *@
+@model List<ProductionTask>
+
+@{
+    int instructionId = ViewBag.InstructionId;
+    var instructionSteps = ViewBag.InstructionSteps as List<InstructionSteps>;
+    var teams = ViewBag.Teams as List<Team>;
+}
+
+<h2>Wybierz część</h2>
+
+<form asp-action="ProductionCreate" asp-controller="Production" method="post">
+    @for (var i = 0; i < instructionSteps.Count; i++)
+    {
+        var instructionStep = instructionSteps[i];
+
+        <input type="hidden" name="ProductionTasks[@i].InstructionStep" value="@instructionStep.InstructionStepId" />
+        <input type="hidden" name="ProductionTasks[@i].TaskName" value="Task_@instructionStep.InstructionStepNumber" />
+
+        <div>
+            <h3>Step: @instructionStep.InstructionStepDescription</h3>
+            <h4>Work scope: @instructionStep.StepWorkScope</h4>
+            <label for="ProductionTasks_TeamId_@i">Zespół:</label>
+            <select name="ProductionTasks[@i].TeamId" id="ProductionTasks_TeamId_@i" class="form-control">
+                <option value="">-- Wybierz zespół --</option>
+                @foreach (var team in teams)
+                {
+                    if(team.TeamWorkScope == instructionStep.StepWorkScope)
+                    {
+                        <option value="@team.TeamId">@team.TeamName, @team.TeamWorkScope</option>
+                    }
+                }
+                @foreach (var team in teams)
+                {
+                    if (team.TeamWorkScope != instructionStep.StepWorkScope)
+                    {
+                        <option value="@team.TeamId">@team.TeamName, @team.TeamWorkScope</option>
+                    }
+                }
+            </select>
+        </div>
+        <br/>
+    }
+    <input type="hidden" name="InstructionId" value="@instructionId">
+    <button type="submit" class="btn btn-primary">Zapisz</button>
+</form>

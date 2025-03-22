@@ -3,3 +3,21 @@
 *@
 @{
 }
+@model MES_F1.Models.Instruction
+
+<h2>Wybierz część</h2>
+
+<form asp-action="ProductionSetup" method="post">
+    <div>
+        <label for="InstructionId">Start parts production:</label>
+        <select name="InstructionId" class="form-control" required onchange="this.form.submit()">
+            <option value="">-- Wybierz zespół --</option>
+            @foreach (var Instruction in ViewBag.Instructions)
+            {
+                <option value="@Instruction.InstructionId" selected="@(ViewBag.InstructionId == Instruction.InstructionId ? "selected" : null)">
+                    @Instruction.InstructionName
+                </option>
+            }
+        </select>
+    </div>
+</form>

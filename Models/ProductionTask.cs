@@ -19,5 +19,8 @@
         public int ProductionId { get; set; }
 
         public Production? Production { get; set; }
+
+        public ProductionTask() { }
+
     }
 }
