@@ -5,48 +5,46 @@
 }
 
 @* TODO Strona z inicjacją produkcji części. Przypisanie poszczególnych zadań zespołom i ustawienie tego w terminarzu *@
-@model List<ProductionTask>
+@model MES_F1.Models.ViewModels.ProductionCreateViewModel
 
 @{
     int instructionId = ViewBag.InstructionId;
     var instructionSteps = ViewBag.InstructionSteps as List<InstructionSteps>;
     var teams = ViewBag.Teams as List<Team>;
+    var machines = ViewBag.Machine as List<Machine>;
 }
-
 <h2>Wybierz część</h2>
 
 <form asp-action="ProductionCreate" asp-controller="Production" method="post">
+    <input type="hidden" asp-for="InstructionId" />
+
     @for (var i = 0; i < instructionSteps.Count; i++)
     {
         var instructionStep = instructionSteps[i];
 
-        <input type="hidden" name="ProductionTasks[@i].InstructionStep" value="@instructionStep.InstructionStepId" />
-        <input type="hidden" name="ProductionTasks[@i].TaskName" value="Task_@instructionStep.InstructionStepNumber" />
+        <input type="hidden" asp-for="Tasks[i].InstructionStep" />
+        <input type="hidden" asp-for="Tasks[i].TaskName" />
 
         <div>
             <h3>Step: @instructionStep.InstructionStepDescription</h3>
             <h4>Work scope: @instructionStep.StepWorkScope</h4>
-            <label for="ProductionTasks_TeamId_@i">Zespół:</label>
-            <select name="ProductionTasks[@i].TeamId" id="ProductionTasks_TeamId_@i" class="form-control">
+
+            <label asp-for="Tasks[i].TeamId">Zespół:</label>
+            <select asp-for="Tasks[i].TeamId" class="form-control">
                 <option value="">-- Wybierz zespół --</option>
                 @foreach (var team in teams)
                 {
-                    if(team.TeamWorkScope == instructionStep.StepWorkScope)
-                    {
-                        <option value="@team.TeamId">@team.TeamName, @team.TeamWorkScope</option>
-                    }
-                }
-                @foreach (var team in teams)
-                {
-                    if (team.TeamWorkScope != instructionStep.StepWorkScope)
-                    {
-                        <option value="@team.TeamId">@team.TeamName, @team.TeamWorkScope</option>
-                    }
+                    <option value="@team.TeamId">@team.TeamName (@team.TeamWorkScope)</option>
                 }
             </select>
+            <span asp-validation-for="Tasks[i].TeamId" class="text-danger"></span>
         </div>
-        <br/>
+        <br />
     }
-    <input type="hidden" name="InstructionId" value="@instructionId">
+
     <button type="submit" class="btn btn-primary">Zapisz</button>
 </form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,4 +1,6 @@
-﻿namespace MES_F1.Models
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace MES_F1.Models
 {
     public class ProductionTask
     {
@@ -11,8 +13,8 @@
         public int TeamId { get; set; }
 
         public Team? Team { get; set; }
-
-        public int MachineId { get; set; }
+        [AllowNull]
+        public int? MachineId { get; set; }
 
         public Machine? Machine { get; set; }
 
