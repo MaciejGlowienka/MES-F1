@@ -4,14 +4,20 @@
 @{
 }
 
-@model MES_F1.Models.Worker
+@model MES_F1.Models.ViewModels.TeamAssignViewModel;
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
 
 <h2>Wybierz zespół</h2>
 
 <form asp-action="TeamDisplay" method="post">
     <div>
-        <label for="TeamId">Zespół:</label>
-        <select name="TeamId" class="form-control" required onchange="this.form.submit()">
+        <label asp-for="TeamId">Zespół:</label>
+        <select asp-for="TeamId" class="form-control" required onchange="this.form.submit()">
             <option value="">-- Wybierz zespół --</option>
             @foreach (var team in ViewBag.Teams)
             {
@@ -33,8 +39,22 @@
 
 @if (ViewBag.TeamId != null)
 {
-    <h2>Pracownicy w zespole @ViewBag.TeamId</h2>
-    <h2>Work Scope @ViewBag.TeamWorkScope</h2>
+@*     <h2>Pracownicy w zespole @ViewBag.TeamId</h2>
+    <h2>Work Scope @ViewBag.TeamWorkScope</h2> *@
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Pracownicy w zespole @ViewBag.TeamName</th>
+                <th>Work Scope @ViewBag.TeamWorkScope</th>
+                <th>
+                    <form asp-action="RemoveTeam" method="post" onsubmit="return confirm('Do you want to remove this team?');">
+                        <input type="hidden" asp-for="TeamId" value="@ViewBag.TeamId" />
+                        <button type="submit" class="btn btn-danger btn-sm">Usuń</button>
+                    </form>
+                </th>
+            </tr>
+        </thead>
+    </table>
 
     @if (ViewBag.WorkersWithRoles != null && ViewBag.WorkersWithRoles.Count > 0)
     {
@@ -54,8 +74,8 @@
                         <td>@worker.RoleName</td>
                         <td>
                             <form asp-action="RemoveWorkerFromTeam" method="post">
-                                <input type="hidden" name="TeamId" value="@ViewBag.TeamId" />
-                                <input type="hidden" name="WorkerId" value="@worker.WorkerId" />
+                                <input type="hidden" asp-for="TeamId" value="@ViewBag.TeamId" />
+                                <input type="hidden" asp-for="WorkerId" value="@worker.WorkerId" />
                                 <button type="submit" class="btn btn-danger btn-sm">Usuń</button>
                             </form>
                         </td>
@@ -72,30 +92,36 @@
     <h3>Dodaj nowego pracownika do zespołu</h3>
 
     <form asp-action="TeamWorkerAssign" method="post">
-        <input type="hidden" name="TeamId" value="@ViewBag.TeamId" />
+        <input type="hidden" asp-for="TeamId" value="@ViewBag.TeamId" />
 
         <div>
-            <label for="WorkerId">Pracownik:</label>
-            <select name="WorkerId" class="form-control" required>
+            <label asp-for="WorkerId">Pracownik:</label>
+            <select asp-for="WorkerId" class="form-control">
                 <option value="">-- Wybierz pracownika --</option>
                 @foreach (var worker in ViewBag.Workers)
                 {
                     <option value="@worker.WorkerId">@worker.WorkerName</option>
                 }
             </select>
+            <span asp-validation-for="WorkerId" class="text-danger"></span>
         </div>
 
         <div>
-            <label for="TeamRoleId">Rola:</label>
-            <select name="TeamRoleId" class="form-control" required>
+            <label asp-for="TeamRoleId">Rola:</label>
+            <select asp-for="TeamRoleId" class="form-control">
                 <option value="">-- Wybierz rolę --</option>
                 @foreach (var role in ViewBag.TeamRoles)
                 {
                     <option value="@role.TeamRoleId">@role.RoleDescription</option>
                 }
             </select>
+            <span asp-validation-for="TeamRoleId" class="text-danger"></span>
         </div>
 
         <button type="submit" class="btn btn-primary">Przypisz</button>
     </form>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
 }

@@ -1,5 +1,6 @@
 ﻿using MES_F1.Data;
 using MES_F1.Models;
+using MES_F1.Models.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -21,35 +22,44 @@ namespace MES_F1.Controllers
         }
 
         [Route("Team/TeamAssign")]
-        public IActionResult TeamAssign(int? TeamId)
+        public IActionResult TeamAssign(int? teamId)
         {
             ViewBag.Teams = _context.Teams.ToList();
             ViewBag.Workers = _context.Workers.Where(w => w.TeamId == null).ToList();
             ViewBag.TeamRoles = _context.TeamRoles.ToList();
-            ViewBag.TeamId = TeamId;
 
-            if (TeamId != null)
+
+            if (teamId != null)
             {
-                ViewBag.WorkersWithRoles = GetWorkerWithRoles((int)TeamId);
+                var team = _context.Teams.FirstOrDefault(t => t.TeamId == teamId);
+                ViewBag.TeamName = team.TeamName;
+                ViewBag.TeamWorkScope = EnumHelper.GetDescription(team.TeamWorkScope);
+                ViewBag.TeamId = teamId;
+                ViewBag.WorkersWithRoles = GetWorkerWithRoles((int)teamId);
             }
 
             return View();
         }
 
         [HttpPost]
-        public IActionResult TeamWorkerAssign(int TeamId, int WorkerId, int TeamRoleId)
+        public IActionResult TeamWorkerAssign(TeamAssignViewModel model)
         {
 
-            var worker = _context.Workers.FirstOrDefault(w => w.WorkerId == WorkerId);
+            if (!ModelState.IsValid)
+            {
+                return RedirectToAction("TeamAssign");
+            }
+
+            var worker = _context.Workers.FirstOrDefault(w => w.WorkerId == model.WorkerId);
 
             if (worker != null)
             {
-                worker.TeamId = TeamId;
-                worker.TeamRoleId = TeamRoleId;
+                worker.TeamId = model.TeamId;
+                worker.TeamRoleId = model.TeamRoleId;
                 _context.SaveChanges();
             }
 
-            return RedirectToAction("TeamAssign", new { TeamId });
+            return RedirectToAction("TeamAssign", new { model.TeamId });
         }
 
 
@@ -73,6 +83,30 @@ namespace MES_F1.Controllers
 
             return RedirectToAction("TeamAssign", new { TeamId });
         }
+
+        [HttpPost]
+        public IActionResult RemoveTeam(int TeamId)
+        {
+            var team = _context.Teams.FirstOrDefault(t => t.TeamId == TeamId);
+            var workers = _context.Workers.Where(w => w.TeamId == TeamId).ToList();
+            if (team == null)
+            {
+                return NotFound();
+            }
+
+            foreach (var worker in workers)
+            {
+                worker.TeamId = null;
+                _context.Workers.Update(worker);
+            }
+
+            _context.Teams.Remove(team);
+            _context.SaveChanges();
+
+            TempData["SuccessMessage"] = "Team has been removed.";
+            return RedirectToAction("TeamAssign");
+        }
+
 
         public object GetWorkerWithRoles(int TeamId)
         {
@@ -101,6 +135,7 @@ namespace MES_F1.Controllers
                 var team = new Team(TeamName, TeamWorkScope);
                 _context.Teams.Add(team);
                 _context.SaveChanges();
+                TempData["SuccessMessage"] = "Team has been successfully created.";
             }
 
             return RedirectToAction("TeamAssign");
