@@ -13,7 +13,7 @@
     var teams = ViewBag.Teams as List<Team>;
     var machines = ViewBag.Machine as List<Machine>;
 }
-<h2>Wybierz część</h2>
+<h2>Choose teams for every step</h2>
 
 <form asp-action="ProductionCreate" asp-controller="Production" method="post">
     <input type="hidden" asp-for="InstructionId" />
@@ -27,14 +27,14 @@
 
         <div>
             <h3>Step: @instructionStep.InstructionStepDescription</h3>
-            <h4>Work scope: @instructionStep.StepWorkScope</h4>
+            <h4>Work scope: @EnumHelper.GetDescription(instructionStep.StepWorkScope)</h4>
 
-            <label asp-for="Tasks[i].TeamId">Zespół:</label>
+            <label asp-for="Tasks[i].TeamId">Team:</label>
             <select asp-for="Tasks[i].TeamId" class="form-control">
-                <option value="">-- Wybierz zespół --</option>
+                <option value="">-- Choose team --</option>
                 @foreach (var team in teams)
                 {
-                    <option value="@team.TeamId">@team.TeamName (@team.TeamWorkScope)</option>
+                    <option value="@team.TeamId">@team.TeamName (@EnumHelper.GetDescription(team.TeamWorkScope))</option>
                 }
             </select>
             <span asp-validation-for="Tasks[i].TeamId" class="text-danger"></span>
@@ -42,7 +42,7 @@
         <br />
     }
 
-    <button type="submit" class="btn btn-primary">Zapisz</button>
+    <button type="submit" class="btn btn-primary">Save</button>
 </form>
 
 @section Scripts {

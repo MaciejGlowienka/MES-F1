@@ -22,6 +22,14 @@ namespace MES_F1.Models
 
         public Production? Production { get; set; }
 
+        public DateTime PlannedStartTime { get; set; }
+
+        public DateTime PlannedEndTime { get; set; }
+
+        public DateTime? ActualStartTime { get; set; }
+
+        public DateTime? ActualEndTime { get; set; }
+
         public ProductionTask() { }
 
     }

@@ -10,13 +10,13 @@
 <form asp-action="CreateTeam" method="post" asp-action="TeamAssign">
 
     <div class="form-group">
-        <label asp-for="TeamName" class="control-label"></label>
+        <label asp-for="TeamName" class="control-label">Name</label>
         <input asp-for="TeamName" class="form-control" />
         <span asp-validation-for="TeamName" class="text-danger"></span>
     </div>
 
     <div class="form-group">
-        <label asp-for="TeamWorkScope" class="control-label">Select Work Scope</label>
+        <label asp-for="TeamWorkScope" class="control-label">Work Scope</label>
         <select asp-for="TeamWorkScope" asp-items="Html.GetEnumSelectList<MES_F1.Models.WorkScope>()" class="form-control"></select>
     </div>
 

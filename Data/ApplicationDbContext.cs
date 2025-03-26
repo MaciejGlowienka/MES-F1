@@ -60,13 +60,13 @@ namespace MES_F1.Data
             builder.Entity<Instruction>()
                 .Property(w => w.InstructionPartType)
                 .HasConversion<string>()
-                .HasMaxLength(15)
+                .HasMaxLength(25)
                 .IsRequired();
 
             builder.Entity<Team>()
                 .Property(w => w.TeamWorkScope)
                 .HasConversion<string>()
-                .HasMaxLength(15)
+                .HasMaxLength(25)
                 .IsRequired();
 
             builder.Entity<Production>()

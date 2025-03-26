@@ -5,13 +5,13 @@
 }
 @model MES_F1.Models.Instruction
 
-<h2>Wybierz część</h2>
+<h2>Start parts production</h2>
 
 <form asp-action="ProductionSetup" method="post">
     <div>
-        <label for="InstructionId">Start parts production:</label>
+        <label for="InstructionId">Choose part:</label>
         <select name="InstructionId" class="form-control" required onchange="this.form.submit()">
-            <option value="">-- Wybierz zespół --</option>
+            <option value="">-- Choose part --</option>
             @foreach (var Instruction in ViewBag.Instructions)
             {
                 <option value="@Instruction.InstructionId" selected="@(ViewBag.InstructionId == Instruction.InstructionId ? "selected" : null)">
