@@ -7,10 +7,10 @@
 
 <h2>Start parts production</h2>
 
-<form asp-action="ProductionSetup" method="post">
+<form asp-action="ProductionCreate" method="post">
     <div>
-        <label for="InstructionId">Choose part:</label>
-        <select name="InstructionId" class="form-control" required onchange="this.form.submit()">
+        <label asp-for="InstructionId">Choose part:</label>
+        <select asp-for="InstructionId" class="form-control" required onchange="this.form.submit()">
             <option value="">-- Choose part --</option>
             @foreach (var Instruction in ViewBag.Instructions)
             {

@@ -4,6 +4,7 @@ using MES_F1.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MES_F1.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250329123224_TaskTime")]
+    partial class TaskTime
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -524,10 +527,10 @@ namespace MES_F1.Migrations
                     b.Property<int?>("MachineId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("PlannedEndTime")
+                    b.Property<DateTime>("PlannedEndTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("PlannedStartTime")
+                    b.Property<DateTime>("PlannedStartTime")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("ProductionId")
@@ -537,7 +540,7 @@ namespace MES_F1.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("TeamId")
+                    b.Property<int>("TeamId")
                         .HasColumnType("int");
 
                     b.HasKey("ProductionTaskId");
@@ -904,7 +907,8 @@ namespace MES_F1.Migrations
                     b.HasOne("MES_F1.Models.Team", "Team")
                         .WithMany()
                         .HasForeignKey("TeamId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Machine");
 

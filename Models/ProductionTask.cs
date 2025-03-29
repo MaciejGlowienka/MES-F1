@@ -10,7 +10,8 @@ namespace MES_F1.Models
 
         public int InstructionStep { get; set; }
 
-        public int TeamId { get; set; }
+        [AllowNull]
+        public int? TeamId { get; set; }
 
         public Team? Team { get; set; }
         [AllowNull]
@@ -21,13 +22,13 @@ namespace MES_F1.Models
         public int ProductionId { get; set; }
 
         public Production? Production { get; set; }
-
-        public DateTime PlannedStartTime { get; set; }
-
-        public DateTime PlannedEndTime { get; set; }
-
+        [AllowNull]
+        public DateTime? PlannedStartTime { get; set; }
+        [AllowNull]
+        public DateTime? PlannedEndTime { get; set; }
+        [AllowNull]
         public DateTime? ActualStartTime { get; set; }
-
+        [AllowNull]
         public DateTime? ActualEndTime { get; set; }
 
         public ProductionTask() { }

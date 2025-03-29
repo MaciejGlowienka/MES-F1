@@ -12,5 +12,8 @@ namespace MES_F1.Models.ViewModels
 
         [Required(ErrorMessage = "Wybierz zespół.")]
         public int? TeamId { get; set; }
+
+        [Required]
+        public int ProductionId { get; set; }
     }
 }
