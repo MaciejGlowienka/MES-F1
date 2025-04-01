@@ -70,6 +70,12 @@ namespace MES_F1.Data
                 .IsRequired();
 
             builder.Entity<Production>()
+                .Property(w => w.State)
+                .HasConversion<string>()
+                .HasMaxLength(25)
+                .IsRequired();
+
+            builder.Entity<Production>()
                 .HasOne(w => w.Instruction)
                 .WithMany()
                 .HasForeignKey(w => w.InstructionId)

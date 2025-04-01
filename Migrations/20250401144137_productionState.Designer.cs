@@ -4,6 +4,7 @@ using MES_F1.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MES_F1.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250401144137_productionState")]
+    partial class productionState
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -119,7 +122,7 @@ namespace MES_F1.Migrations
 
                     b.HasKey("InstructionId");
 
-                    b.ToTable("Instructions", (string)null);
+                    b.ToTable("Instructions");
 
                     b.HasData(
                         new
@@ -186,7 +189,7 @@ namespace MES_F1.Migrations
 
                     b.HasIndex("InstructionId");
 
-                    b.ToTable("InstructionSteps", (string)null);
+                    b.ToTable("InstructionSteps");
 
                     b.HasData(
                         new
@@ -362,7 +365,7 @@ namespace MES_F1.Migrations
 
                     b.HasKey("MachineId");
 
-                    b.ToTable("Machines", (string)null);
+                    b.ToTable("Machines");
                 });
 
             modelBuilder.Entity("MES_F1.Models.MaterialLocation", b =>
@@ -392,7 +395,7 @@ namespace MES_F1.Migrations
 
                     b.HasIndex("WarehouseSpotId");
 
-                    b.ToTable("MaterialLocation", (string)null);
+                    b.ToTable("MaterialLocation");
                 });
 
             modelBuilder.Entity("MES_F1.Models.Materials", b =>
@@ -413,7 +416,7 @@ namespace MES_F1.Migrations
 
                     b.HasKey("MaterialsId");
 
-                    b.ToTable("Materials", (string)null);
+                    b.ToTable("Materials");
                 });
 
             modelBuilder.Entity("MES_F1.Models.PartLocation", b =>
@@ -443,7 +446,7 @@ namespace MES_F1.Migrations
 
                     b.HasIndex("WarehouseSpotId");
 
-                    b.ToTable("PartLocation", (string)null);
+                    b.ToTable("PartLocation");
                 });
 
             modelBuilder.Entity("MES_F1.Models.Parts", b =>
@@ -473,7 +476,7 @@ namespace MES_F1.Migrations
 
                     b.HasIndex("ProductionId");
 
-                    b.ToTable("Parts", (string)null);
+                    b.ToTable("Parts");
                 });
 
             modelBuilder.Entity("MES_F1.Models.Production", b =>
@@ -506,7 +509,7 @@ namespace MES_F1.Migrations
 
                     b.HasIndex("InstructionId");
 
-                    b.ToTable("Productions", (string)null);
+                    b.ToTable("Productions");
                 });
 
             modelBuilder.Entity("MES_F1.Models.ProductionTask", b =>
@@ -553,7 +556,7 @@ namespace MES_F1.Migrations
 
                     b.HasIndex("TeamId");
 
-                    b.ToTable("ProductionTasks", (string)null);
+                    b.ToTable("ProductionTasks");
                 });
 
             modelBuilder.Entity("MES_F1.Models.Team", b =>
@@ -575,7 +578,7 @@ namespace MES_F1.Migrations
 
                     b.HasKey("TeamId");
 
-                    b.ToTable("Teams", (string)null);
+                    b.ToTable("Teams");
                 });
 
             modelBuilder.Entity("MES_F1.Models.TeamRole", b =>
@@ -596,7 +599,7 @@ namespace MES_F1.Migrations
 
                     b.HasKey("TeamRoleId");
 
-                    b.ToTable("TeamRoles", (string)null);
+                    b.ToTable("TeamRoles");
 
                     b.HasData(
                         new
@@ -633,7 +636,7 @@ namespace MES_F1.Migrations
 
                     b.HasKey("WharehouseSpotId");
 
-                    b.ToTable("WharehouseSpot", (string)null);
+                    b.ToTable("WharehouseSpot");
                 });
 
             modelBuilder.Entity("MES_F1.Models.Worker", b =>
@@ -672,7 +675,7 @@ namespace MES_F1.Migrations
 
                     b.HasIndex("TeamRoleId");
 
-                    b.ToTable("Workers", (string)null);
+                    b.ToTable("Workers");
 
                     b.HasData(
                         new

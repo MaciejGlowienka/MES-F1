@@ -6,28 +6,48 @@
 
 @model MES_F1.Models.Production
 
-@foreach (Production production in ViewBag.Productions){
+<h2>Choose peoduction state</h2>
 
-    <form asp-action="ProductionSetup" method="post">
-        <div>
-            <input type="hidden" asp-for="ProductionId" value="@production.ProductionId"/>
-            <p>@production.Name
+<form asp-action="ProductionList" method="post">
+    <div>
+        <label asp-for="State">Production State:</label>
+        <select asp-for="State" class="form-control" required onchange="this.form.submit()">
+            <option value="">-- Choose state --</option>
+            @foreach (var state in Enum.GetValues(typeof(MES_F1.Models.ProductionState)).Cast<MES_F1.Models.ProductionState>())
+            {
+                <option value="@((int)state)" selected="@(ViewBag.ProductionState == state ? "selected" : null)">
+                    @EnumHelper.GetDescription(state)
+                </option>
+            }
+        </select>
+    </div>
+</form>
 
+@if(ViewBag.Productions != null)
+{
+    @foreach (Production production in ViewBag.Productions)
+    {
+
+        <form asp-action="ProductionSetup" method="post">
+            <input type="hidden" asp-for="ProductionId" value="@production.ProductionId" />
+            @production.Name
             <button type="submit" class="btn btn-primary">Edit</button>
-            </p>
-        </div>
-    </form>
+        </form>
 
-    <form asp-action="RemoveProduction" method="post" onsubmit="return confirmDeletion()">
-        <input type="hidden" asp-for="ProductionId" value="@production.ProductionId" />
-        <button type="submit" class="btn btn-danger btn-sm">Delete this production</button>
-    </form>
+        <form asp-action="RemoveProduction" method="post" onsubmit="return confirmDeletion()">
+            <input type="hidden" asp-for="ProductionId" value="@production.ProductionId" />
+            @if(production.State == ProductionState.None){
+                <button type="submit" class="btn btn-danger btn-sm">Delete this production</button>
+            }
+        </form>
 
+    }
 }
+
 
 <script>
     function confirmDeletion() {
-        let userInput = prompt("Aby usunąć produkcję, wpisz: CONFIRM");
+        let userInput = prompt("To remove this production type: CONFIRM");
         return userInput === "CONFIRM";
     }
 </script>

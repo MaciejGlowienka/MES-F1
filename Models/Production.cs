@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Mono.TextTemplating;
+using System.ComponentModel.DataAnnotations;
 
 namespace MES_F1.Models
 {
@@ -12,6 +13,8 @@ namespace MES_F1.Models
         public int? InstructionId { get; set; }
 
         public Instruction Instruction { get; set; }
+
+        public ProductionState State { get; set; } = ProductionState.None;
 
         public DateTime StartTime { get; set; }
 

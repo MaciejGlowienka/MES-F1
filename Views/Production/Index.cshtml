@@ -3,7 +3,7 @@
 *@
 @{
 }
-@model MES_F1.Models.Instruction
+@model MES_F1.Models.Production
 
 <h2>Start parts production</h2>
 
@@ -19,5 +19,7 @@
                 </option>
             }
         </select>
+
+        <input type="hidden" asp-for="State" value="None" />
     </div>
 </form>

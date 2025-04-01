@@ -3,7 +3,22 @@
 *@
 @{
 }
-@model MES_F1.Models.ProductionTask
+@model MES_F1.Models.ViewModels.ProductionEditViewModel
+
+<form asp-action="ProductionEdit" method="post">
+
+    <input type="hidden" asp-for="ProductionId"/>
+
+    <div class="form-group">
+        <label asp-for="State" class="control-label">State</label>
+        <select asp-for="State"
+                asp-items="Html.GetEnumSelectList<MES_F1.Models.ProductionState>()"
+                class="form-control"
+                id="stateDropdown">
+        </select>
+    </div>
+
+</form>
 
 @foreach (ProductionTask task in ViewBag.ProductionTasks)
 {
@@ -14,3 +29,9 @@
         </div>
 
 }
+
+<script>
+    document.getElementById("stateDropdown").addEventListener("change", function() {
+        this.form.submit();
+    });
+</script>

@@ -3,6 +3,7 @@ using MES_F1.Models;
 using MES_F1.Models.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 
 namespace MES_F1.Controllers
@@ -29,7 +30,7 @@ namespace MES_F1.Controllers
         }
 
         [HttpPost]
-        public IActionResult ProductionCreate(int InstructionId)
+        public IActionResult ProductionCreate(int InstructionId, ProductionState state)
         {
 
             var Instruction = _context.Instructions.FirstOrDefault(w => w.InstructionId == InstructionId);
@@ -43,7 +44,8 @@ namespace MES_F1.Controllers
             {
                 StartTime = DateTime.Now,
                 InstructionId = InstructionId,
-                Name = Instruction.InstructionName + " " + DateTime.Now
+                Name = Instruction.InstructionName + " " + DateTime.Now,
+                State = state
             };
 
             _context.Productions.Add(prod);
@@ -69,18 +71,48 @@ namespace MES_F1.Controllers
         }
 
 
-
         public IActionResult ProductionList()
         {
-            ViewBag.Productions = _context.Productions;
+            ViewBag.Productions = null;
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult ProductionList(ProductionState state)
+        {
+            ViewBag.Productions = _context.Productions.Where(w => w.State == state).ToList();
+            ViewBag.ProductionState = state;
             return View();
         }
 
         [HttpPost]
         public IActionResult ProductionSetup(int productionId)
         {
+            var production = _context.Productions.FirstOrDefault(p => p.ProductionId == productionId);
+            if (production == null)
+            {
+                return NotFound();
+            }
+            var model = new ProductionEditViewModel
+            {
+                ProductionId = production.ProductionId,
+                State = production.State 
+                
+            };
+
             ViewBag.ProductionTasks = _context.ProductionTasks.Where(w => w.ProductionId == productionId).ToList();
-            return View();
+            return View(model);
+        }
+
+        [HttpPost]
+        public IActionResult ProductionEdit(int productionId, ProductionState State)
+        {
+            var prod = _context.Productions.FirstOrDefault(w => w.ProductionId == productionId);
+            prod.State = State;
+            _context.Productions.Update(prod);
+            _context.SaveChanges();
+
+            return RedirectToAction("ProductionList");
         }
 
         [HttpPost]
