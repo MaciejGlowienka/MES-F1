@@ -67,22 +67,23 @@ namespace MES_F1.Controllers
             }
             _context.SaveChanges();
 
-            return RedirectToAction("ProductionList");
+            return RedirectToAction("ProductionList", new { prod.State });
         }
 
-
-        public IActionResult ProductionList()
+        
+        public IActionResult ProductionList(ProductionState? state)
         {
             ViewBag.Productions = null;
-            return View();
-        }
+            var model = new ProductionListViewModel();
+            if (state != null)
+            {
+                ViewBag.Productions = _context.Productions.Where(w => w.State == state).ToList();
+                ViewBag.ProductionState = state;
 
-        [HttpPost]
-        public IActionResult ProductionList(ProductionState state)
-        {
-            ViewBag.Productions = _context.Productions.Where(w => w.State == state).ToList();
-            ViewBag.ProductionState = state;
-            return View();
+                model.State = (ProductionState)state;
+            }
+            
+            return View(model);
         }
 
         [HttpPost]
@@ -112,7 +113,7 @@ namespace MES_F1.Controllers
             _context.Productions.Update(prod);
             _context.SaveChanges();
 
-            return RedirectToAction("ProductionList");
+            return RedirectToAction("ProductionList", new { prod.State });
         }
 
         [HttpPost]
@@ -161,7 +162,7 @@ namespace MES_F1.Controllers
             _context.SaveChanges();
 
             TempData["SuccessMessage"] = "Production has been removed.";
-            return RedirectToAction("ProductionList");
+            return RedirectToAction("ProductionList", new {prod.State});
         }
     }
 }

@@ -4,9 +4,9 @@
 @{
 }
 
-@model MES_F1.Models.Production
+@model MES_F1.Models.ViewModels.ProductionListViewModel
 
-<h2>Choose peoduction state</h2>
+<h2>Choose production state</h2>
 
 <form asp-action="ProductionList" method="post">
     <div>
@@ -29,15 +29,16 @@
     {
 
         <form asp-action="ProductionSetup" method="post">
+            <hr />
             <input type="hidden" asp-for="ProductionId" value="@production.ProductionId" />
-            @production.Name
             <button type="submit" class="btn btn-primary">Edit</button>
+            @production.Name
         </form>
 
         <form asp-action="RemoveProduction" method="post" onsubmit="return confirmDeletion()">
             <input type="hidden" asp-for="ProductionId" value="@production.ProductionId" />
             @if(production.State == ProductionState.None){
-                <button type="submit" class="btn btn-danger btn-sm">Delete this production</button>
+                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
             }
         </form>
 
