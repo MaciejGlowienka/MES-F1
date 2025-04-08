@@ -6,8 +6,11 @@ namespace MES_F1.Models.ViewModels
     {
         public int ProductionId { get; set; }
 
+        public string ProductionName { get; set; }
+
         public ProductionState State { get; set; }
 
         public ProductionTask? Task { get; set; }
+
     }
 }

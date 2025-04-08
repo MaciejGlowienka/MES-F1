@@ -5,8 +5,10 @@
 }
 @model MES_F1.Models.ViewModels.ProductionEditViewModel
 
-<form asp-action="ProductionEdit" method="post">
+<h2>@Model.ProductionName</h2>
 
+<form asp-action="ProductionEdit" method="post">
+    
     <input type="hidden" asp-for="ProductionId"/>
 
     <div class="form-group">
@@ -22,12 +24,43 @@
 
 @foreach (ProductionTask task in ViewBag.ProductionTasks)
 {
-        <div> 
-            <p>
-                @task.ProductionTaskId
-            </p>
-        </div>
-
+    <div class="task-block">
+        <p>
+            <strong>Step @task.InstructionStep:</strong> @task.TaskName
+        </p>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Team</th>
+                    <th>Machine</th>
+                    <th>Execution Time</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>@(task.Team?.TeamName ?? "N/A")</td>
+                    <td>@(task.Machine?.MachineName ?? "N/A")</td>
+                    <td>
+                        @if (task.ActualStartTime.HasValue && task.ActualEndTime.HasValue)
+                        {
+                            @($"{task.ActualStartTime.Value:yyyy-MM-dd HH:mm} - {task.ActualEndTime.Value:yyyy-MM-dd HH:mm}")
+                        }
+                        else
+                        {
+                            <span>Not started</span>
+                        }
+                    </td>
+                    <td>
+                        <form asp-action="TaskEdit" method="post" style="display:inline;">
+                            <input type="hidden" name="TaskId" value="@task.ProductionTaskId" />
+                            <button type="submit" class="btn btn-sm btn-outline-primary">Edit</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 }
 
 <script>

@@ -16,5 +16,7 @@ namespace MES_F1.Models
         public WorkScope StepWorkScope { get; set; } = 0;
 
         public string? InstructionStepDescription { get; set; }
+
+        public int EstimatedDurationMinutes { get; set; } = 60;
     }
 }
