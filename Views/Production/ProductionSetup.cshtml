@@ -33,6 +33,7 @@
                 <tr>
                     <th>Team</th>
                     <th>Machine</th>
+                    <th>Planned Time</th>
                     <th>Execution Time</th>
                     <th>Actions</th>
                 </tr>
@@ -41,6 +42,16 @@
                 <tr>
                     <td>@(task.Team?.TeamName ?? "N/A")</td>
                     <td>@(task.Machine?.MachineName ?? "N/A")</td>
+                    <td>
+                        @if (task.PlannedStartTime.HasValue && task.PlannedEndTime.HasValue)
+                        {
+                            @($"{task.PlannedStartTime.Value:yyyy-MM-dd HH:mm} - {task.PlannedEndTime.Value:yyyy-MM-dd HH:mm}")
+                        }
+                        else
+                        {
+                            <span>Not planned</span>
+                        }
+                    </td>
                     <td>
                         @if (task.ActualStartTime.HasValue && task.ActualEndTime.HasValue)
                         {

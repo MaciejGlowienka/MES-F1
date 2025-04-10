@@ -1,10 +1,24 @@
 ﻿@model MES_F1.Models.ViewModels.TaskEditViewModel
 
+@using Microsoft.AspNetCore.Mvc.ModelBinding
+
+@{
+    ViewData["Title"] = "Edytuj zadanie";
+}
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        @Html.ValidationSummary()
+    </div>
+}
+
 <h2>Edit Task - Step @Model.InstructionStep</h2>
 
-<form asp-action="SaveTaskEdit" method="post">
+<form asp-action="TaskSave" method="post">
+    <input type="hidden" asp-for="InstructionStep" />
     <input type="hidden" asp-for="TaskId" />
-    <input type="hidden" id="duration" value="@Model.EstimatedDurationMinutes" />
+    <input type="hidden" asp-for="EstimatedDurationMinutes" />
 
     <div class="form-group">
         <label asp-for="TaskName">Task Name</label>
@@ -13,7 +27,9 @@
 
     <div class="form-group">
         <label asp-for="TeamId">Team</label>
-        <select asp-for="TeamId" class="form-control" asp-items="@(new SelectList(Model.Teams, "TeamId", "TeamName"))"></select>
+        <select asp-for="TeamId" class="form-control" asp-items="@(new SelectList(Model.Teams, "TeamId", "TeamName"))" id="teamSelect">
+            <option value="">Select a team</option>
+        </select>
     </div>
 
     <div class="form-group">
@@ -32,13 +48,76 @@
     </div>
 
     <button type="submit" class="btn btn-primary">Save</button>
+
 </form>
+
+<div id="teamTasks" class="form-group">
+    <label>Scheduled Tasks for Team</label>
+    <ul id="taskList">
+        <!-- Lista zadań zespołu będzie tutaj wyświetlana -->
+    </ul>
+</div>
 
 @section Scripts {
     <script>
+        // Obsługuje zmianę zespołu
+                                document.addEventListener("DOMContentLoaded", function () {
+            // Sprawdzamy, czy mamy ustawiony teamId po załadowaniu strony
+            const teamId = document.getElementById("teamSelect").value;
+
+            if (teamId) {
+                loadTeamTasks(teamId); // Ładujemy zadania zespołu, jeśli teamId jest ustawiony
+            }
+        });
+
+        document.getElementById("teamSelect").addEventListener("change", function () {
+            const teamId = this.value;
+
+            if (teamId) {
+                loadTeamTasks(teamId); // Ładujemy zadania zespołu przy zmianie
+            } else {
+                document.getElementById("taskList").innerHTML = "<li>Proszę wybrać zespół, aby zobaczyć zaplanowane zadania.</li>";
+            }
+        });
+
+        // Funkcja do pobrania i wyświetlenia zadań zespołu
+        function loadTeamTasks(teamId) {
+            fetch(`/Production/GetTeamTasks?teamId=${teamId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const taskList = document.getElementById("taskList");
+                    taskList.innerHTML = ""; // Czyszczymy poprzednią listę
+
+                    if (data.length > 0) {
+                        data.forEach(task => {
+                            const plannedStartTime = new Date(task.plannedStartTime);
+                            const plannedEndTime = new Date(task.plannedEndTime);
+
+                            // Sprawdzamy, czy daty są prawidłowe
+                            if (isNaN(plannedStartTime) || isNaN(plannedEndTime)) {
+                                return; // Pomijamy zadanie z nieprawidłową datą
+                            }
+
+                            // Tworzymy element listy dla zadania
+                            const li = document.createElement("li");
+                            li.textContent = `${task.taskName} - ${plannedStartTime.toLocaleString()} do ${plannedEndTime.toLocaleString()}`;
+                            taskList.appendChild(li);
+                        });
+                    } else {
+                        // Jeśli brak zaplanowanych zadań, wyświetlamy komunikat
+                        taskList.innerHTML = "<li>Brak zaplanowanych zadań dla tego zespołu.</li>";
+                    }
+                })
+                .catch(error => {
+                    // Obsługuje błędy w przypadku niepowodzenia fetch
+                    console.error("Błąd podczas pobierania danych:", error);
+                });
+        }
+
+        // Automatyczne uzupełnianie planowanego czasu zakończenia
         document.getElementById("startTime").addEventListener("change", function () {
             const start = new Date(this.value);
-            const duration = parseInt(document.getElementById("duration").value);
+            const duration = parseInt(document.getElementById("EstimatedDurationMinutes").value);
 
             if (!isNaN(start.getTime()) && !isNaN(duration)) {
                 const end = new Date(start.getTime() + duration * 60000);

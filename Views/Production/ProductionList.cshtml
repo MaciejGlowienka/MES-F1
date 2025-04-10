@@ -28,7 +28,7 @@
     @foreach (Production production in ViewBag.Productions)
     {
 
-        <form asp-action="ProductionSetup" method="post">
+        <form asp-action="ProductionSetup" method="get">
             <hr />
             <input type="hidden" asp-for="ProductionId" value="@production.ProductionId" />
             <button type="submit" class="btn btn-primary">Edit</button>

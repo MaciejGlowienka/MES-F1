@@ -89,7 +89,8 @@ namespace MES_F1.Controllers
             return View(model);
         }
 
-        [HttpPost]
+
+        [HttpGet]
         public IActionResult ProductionSetup(int productionId)
         {
             var production = _context.Productions.FirstOrDefault(p => p.ProductionId == productionId);
@@ -125,6 +126,23 @@ namespace MES_F1.Controllers
             return RedirectToAction("ProductionList", new { prod.State });
         }
 
+        [HttpGet]
+        public IActionResult GetTeamTasks(int teamId)
+        {
+            var teamTasks = _context.ProductionTasks
+                .Where(t => t.TeamId == teamId && t.PlannedStartTime.HasValue && t.PlannedEndTime.HasValue)
+                .Select(t => new
+                {
+                    t.TaskName,
+                    // Sprawdzanie, czy PlannedStartTime jest null przed wywołaniem ToString
+                    PlannedStartTime = t.PlannedStartTime.HasValue ? t.PlannedStartTime.Value.ToString("yyyy-MM-ddTHH:mm:ss") : null,
+                    // Sprawdzanie, czy PlannedEndTime jest null przed wywołaniem ToString
+                    PlannedEndTime = t.PlannedEndTime.HasValue ? t.PlannedEndTime.Value.ToString("yyyy-MM-ddTHH:mm:ss") : null
+                })
+                .ToList();
+
+            return Json(teamTasks);
+        }
 
         [HttpPost]
         public IActionResult TaskEdit(int TaskId)
@@ -147,11 +165,6 @@ namespace MES_F1.Controllers
 
             int duration = instructionStep?.EstimatedDurationMinutes ?? 0;
 
-            if (task.PlannedStartTime.HasValue && !task.PlannedEndTime.HasValue && duration > 0)
-            {
-                task.PlannedEndTime = task.PlannedStartTime.Value.AddMinutes(duration);
-            }
-
             var model = new TaskEditViewModel
             {
                 TaskId = task.ProductionTaskId,
@@ -163,10 +176,94 @@ namespace MES_F1.Controllers
                 PlannedEndTime = task.PlannedEndTime,
                 Teams = _context.Teams.ToList(),
                 Machines = _context.Machines.ToList(),
+                PreviousTask = _context.ProductionTasks.FirstOrDefault(t =>
+                    t.ProductionId == task.ProductionId && t.InstructionStep == task.InstructionStep - 1),
+                NextTask = _context.ProductionTasks.FirstOrDefault(t =>
+                    t.ProductionId == task.ProductionId && t.InstructionStep == task.InstructionStep + 1),
                 EstimatedDurationMinutes = duration
             };
 
             return View("TaskEdit", model);
+        }
+
+        [HttpPost]
+        public IActionResult TaskSave(TaskEditViewModel model)
+        {
+            var task = _context.ProductionTasks.FirstOrDefault(t => t.ProductionTaskId == model.TaskId);
+            if (task == null)
+            {
+                return NotFound();
+            }
+
+            // --- Sprawdzenie kolizji z poprzednim taskiem ---
+            var previousTask = _context.ProductionTasks.FirstOrDefault(t =>
+                t.ProductionId == task.ProductionId &&
+                t.InstructionStep == task.InstructionStep - 1);
+
+            if (previousTask != null && previousTask.PlannedEndTime.HasValue && model.PlannedStartTime.HasValue)
+            {
+                if (model.PlannedStartTime < previousTask.PlannedEndTime)
+                {
+                    ModelState.AddModelError("", $"Ten task rozpoczyna się przed końcem poprzedniego kroku (Step {previousTask.InstructionStep}) o {previousTask.PlannedEndTime.Value:yyyy-MM-dd HH:mm}.");
+                }
+            }
+
+            // --- Sprawdzenie kolizji z następnym taskiem ---
+            var nextTask = _context.ProductionTasks.FirstOrDefault(t =>
+                t.ProductionId == task.ProductionId &&
+                t.InstructionStep == task.InstructionStep + 1);
+
+            if (nextTask != null && nextTask.PlannedStartTime.HasValue && model.PlannedEndTime.HasValue)
+            {
+                if (model.PlannedEndTime > nextTask.PlannedStartTime)
+                {
+                    ModelState.AddModelError("", $"Ten task kończy się po rozpoczęciu następnego kroku (Step {nextTask.InstructionStep}) o {nextTask.PlannedStartTime.Value:yyyy-MM-dd HH:mm}.");
+                }
+            }
+
+            // --- Sprawdzenie kolizji z innymi taskami tego samego zespołu ---
+            if (model.TeamId.HasValue && model.PlannedStartTime.HasValue && model.PlannedEndTime.HasValue)
+            {
+                var overlappingTasks = _context.ProductionTasks
+                    .Where(t =>
+                        t.ProductionTaskId != model.TaskId &&
+                        t.TeamId == model.TeamId &&
+                        t.PlannedStartTime.HasValue &&
+                        t.PlannedEndTime.HasValue &&
+                        (
+                            (model.PlannedStartTime < t.PlannedEndTime && model.PlannedStartTime >= t.PlannedStartTime) || // start w środku
+                            (model.PlannedEndTime > t.PlannedStartTime && model.PlannedEndTime <= t.PlannedEndTime) ||     // koniec w środku
+                            (model.PlannedStartTime <= t.PlannedStartTime && model.PlannedEndTime >= t.PlannedEndTime)    // obejmuje inny
+                        )
+                    ).ToList();
+
+                if (overlappingTasks.Any())
+                {
+                    ModelState.AddModelError("", "Wybrany zespół ma już inne zadanie zaplanowane w tym czasie.");
+
+                }
+            }
+
+            // --- Jeśli są błędy, wróć do widoku z komunikatami ---
+            if (!ModelState.IsValid)
+            {
+                model.Teams = _context.Teams.ToList();
+                model.Machines = _context.Machines.ToList();
+
+
+                return View("TaskEdit", model);
+            }
+
+            // --- Zapis taska ---
+            task.TeamId = model.TeamId;
+            task.MachineId = model.MachineId;
+            task.PlannedStartTime = model.PlannedStartTime;
+            task.PlannedEndTime = model.PlannedEndTime;
+
+            _context.ProductionTasks.Update(task);
+            _context.SaveChanges();
+
+            return RedirectToAction("ProductionSetup", new { productionId = task.ProductionId });
         }
 
 

@@ -18,5 +18,7 @@
 
         public List<Team> Teams { get; set; } = new();
         public List<Machine> Machines { get; set; } = new();
+        public ProductionTask? PreviousTask { get; set; }
+        public ProductionTask? NextTask { get; set; }
     }
 }
