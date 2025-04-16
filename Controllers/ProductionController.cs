@@ -130,7 +130,7 @@ namespace MES_F1.Controllers
         public IActionResult GetTeamTasks(int teamId)
         {
             var teamTasks = _context.ProductionTasks
-                .Where(t => t.TeamId == teamId && t.PlannedStartTime.HasValue && t.PlannedEndTime.HasValue)
+                .Where(t => t.TeamId == teamId && t.PlannedStartTime.HasValue && t.PlannedEndTime.HasValue && t.PlannedEndTime > DateTime.Now)
                 .Select(t => new
                 {
                     t.TaskName,
@@ -142,6 +142,21 @@ namespace MES_F1.Controllers
                 .ToList();
 
             return Json(teamTasks);
+        }
+
+        [HttpGet]
+        public IActionResult GetTeamTasksForCalendar(int teamId)
+        {
+            var tasks = _context.ProductionTasks
+                .Where(t => t.TeamId == teamId && t.PlannedStartTime.HasValue && t.PlannedEndTime.HasValue)
+                .Select(t => new {
+                    title = t.TaskName,
+                    start = t.PlannedStartTime.Value.ToString("s"),
+                    end = t.PlannedEndTime.Value.ToString("s")
+                })
+                .ToList();
+
+            return Json(tasks);
         }
 
         [HttpPost]
@@ -204,7 +219,7 @@ namespace MES_F1.Controllers
             {
                 if (model.PlannedStartTime < previousTask.PlannedEndTime)
                 {
-                    ModelState.AddModelError("", $"Ten task rozpoczyna się przed końcem poprzedniego kroku (Step {previousTask.InstructionStep}) o {previousTask.PlannedEndTime.Value:yyyy-MM-dd HH:mm}.");
+                    ModelState.AddModelError("", $"This task starts before the previous step ends (Step {previousTask.InstructionStep}) - {previousTask.PlannedEndTime.Value:yyyy-MM-dd HH:mm}.");
                 }
             }
 
@@ -217,7 +232,7 @@ namespace MES_F1.Controllers
             {
                 if (model.PlannedEndTime > nextTask.PlannedStartTime)
                 {
-                    ModelState.AddModelError("", $"Ten task kończy się po rozpoczęciu następnego kroku (Step {nextTask.InstructionStep}) o {nextTask.PlannedStartTime.Value:yyyy-MM-dd HH:mm}.");
+                    ModelState.AddModelError("", $"This task ends after the next step starts (Step {nextTask.InstructionStep}) - {nextTask.PlannedStartTime.Value:yyyy-MM-dd HH:mm}.");
                 }
             }
 
@@ -239,9 +254,14 @@ namespace MES_F1.Controllers
 
                 if (overlappingTasks.Any())
                 {
-                    ModelState.AddModelError("", "Wybrany zespół ma już inne zadanie zaplanowane w tym czasie.");
+                    ModelState.AddModelError("", "The selected team already has another task scheduled at this time.");
 
                 }
+            }
+
+            if (model.PlannedStartTime < DateTime.Now)
+            {
+                ModelState.AddModelError("", "Cannot  schedule tasks for a time that has already passed");
             }
 
             // --- Jeśli są błędy, wróć do widoku z komunikatami ---

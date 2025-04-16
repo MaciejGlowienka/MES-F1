@@ -1,4 +1,6 @@
-﻿namespace MES_F1.Models.ViewModels
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+
+namespace MES_F1.Models.ViewModels
 {
     public class TaskEditViewModel
     {
@@ -20,5 +22,12 @@
         public List<Machine> Machines { get; set; } = new();
         public ProductionTask? PreviousTask { get; set; }
         public ProductionTask? NextTask { get; set; }
+
+        public List<SelectListItem> TeamSelectList =>
+           Teams.Select(t => new SelectListItem
+           {
+               Value = t.TeamId.ToString(),
+               Text = $"{t.TeamName} - {EnumHelper.GetDescription(t.TeamWorkScope)}"
+           }).ToList();
     }
 }

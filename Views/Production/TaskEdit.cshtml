@@ -1,9 +1,15 @@
 ﻿@model MES_F1.Models.ViewModels.TaskEditViewModel
-
 @using Microsoft.AspNetCore.Mvc.ModelBinding
 
+<html lang='en'>
+<head>
+    <meta charset='utf-8' />
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.17/index.global.min.js'></script>
+    <script src="~/js/task-edit.js"></script>
+</head>
+<body>
 @{
-    ViewData["Title"] = "Edytuj zadanie";
+    ViewData["Title"] = "Edit task";
 }
 
 @if (!ViewData.ModelState.IsValid)
@@ -13,24 +19,21 @@
     </div>
 }
 
-<h2>Edit Task - Step @Model.InstructionStep</h2>
+<h2>Edit Task - @Model.TaskName</h2>
+<h5>Estimated time for this task - @Model.EstimatedDurationMinutes minutes</h5>
 
 <form asp-action="TaskSave" method="post">
     <input type="hidden" asp-for="InstructionStep" />
     <input type="hidden" asp-for="TaskId" />
     <input type="hidden" asp-for="EstimatedDurationMinutes" />
+    <input type="hidden" asp-for="TaskName" />
 
-    <div class="form-group">
-        <label asp-for="TaskName">Task Name</label>
-        <input asp-for="TaskName" class="form-control" readonly />
-    </div>
-
-    <div class="form-group">
-        <label asp-for="TeamId">Team</label>
-        <select asp-for="TeamId" class="form-control" asp-items="@(new SelectList(Model.Teams, "TeamId", "TeamName"))" id="teamSelect">
-            <option value="">Select a team</option>
-        </select>
-    </div>
+        <div class="form-group">
+            <label asp-for="TeamId">Zespół</label>
+            <select asp-for="TeamId" class="form-control" asp-items="Model.TeamSelectList" id="teamSelect">
+                <option value="">-- Wybierz zespół --</option>
+            </select>
+        </div>
 
     <div class="form-group">
         <label asp-for="MachineId">Machine</label>
@@ -48,89 +51,18 @@
     </div>
 
     <button type="submit" class="btn btn-primary">Save</button>
-
 </form>
 
-<div id="teamTasks" class="form-group">
+<div id="teamTasks" class="form-group mt-4">
     <label>Scheduled Tasks for Team</label>
     <ul id="taskList">
-        <!-- Lista zadań zespołu będzie tutaj wyświetlana -->
     </ul>
 </div>
 
-@section Scripts {
-    <script>
-        // Obsługuje zmianę zespołu
-                                document.addEventListener("DOMContentLoaded", function () {
-            // Sprawdzamy, czy mamy ustawiony teamId po załadowaniu strony
-            const teamId = document.getElementById("teamSelect").value;
+<div id="calendarContainer" style="margin-top: 30px;">
+    <h4>Weekly Task Schedule</h4>
+    <div id="calendar" style="max-width: 100%; height: 600px;"></div>
+</div>
 
-            if (teamId) {
-                loadTeamTasks(teamId); // Ładujemy zadania zespołu, jeśli teamId jest ustawiony
-            }
-        });
-
-        document.getElementById("teamSelect").addEventListener("change", function () {
-            const teamId = this.value;
-
-            if (teamId) {
-                loadTeamTasks(teamId); // Ładujemy zadania zespołu przy zmianie
-            } else {
-                document.getElementById("taskList").innerHTML = "<li>Proszę wybrać zespół, aby zobaczyć zaplanowane zadania.</li>";
-            }
-        });
-
-        // Funkcja do pobrania i wyświetlenia zadań zespołu
-        function loadTeamTasks(teamId) {
-            fetch(`/Production/GetTeamTasks?teamId=${teamId}`)
-                .then(response => response.json())
-                .then(data => {
-                    const taskList = document.getElementById("taskList");
-                    taskList.innerHTML = ""; // Czyszczymy poprzednią listę
-
-                    if (data.length > 0) {
-                        data.forEach(task => {
-                            const plannedStartTime = new Date(task.plannedStartTime);
-                            const plannedEndTime = new Date(task.plannedEndTime);
-
-                            // Sprawdzamy, czy daty są prawidłowe
-                            if (isNaN(plannedStartTime) || isNaN(plannedEndTime)) {
-                                return; // Pomijamy zadanie z nieprawidłową datą
-                            }
-
-                            // Tworzymy element listy dla zadania
-                            const li = document.createElement("li");
-                            li.textContent = `${task.taskName} - ${plannedStartTime.toLocaleString()} do ${plannedEndTime.toLocaleString()}`;
-                            taskList.appendChild(li);
-                        });
-                    } else {
-                        // Jeśli brak zaplanowanych zadań, wyświetlamy komunikat
-                        taskList.innerHTML = "<li>Brak zaplanowanych zadań dla tego zespołu.</li>";
-                    }
-                })
-                .catch(error => {
-                    // Obsługuje błędy w przypadku niepowodzenia fetch
-                    console.error("Błąd podczas pobierania danych:", error);
-                });
-        }
-
-        // Automatyczne uzupełnianie planowanego czasu zakończenia
-        document.getElementById("startTime").addEventListener("change", function () {
-            const start = new Date(this.value);
-            const duration = parseInt(document.getElementById("EstimatedDurationMinutes").value);
-
-            if (!isNaN(start.getTime()) && !isNaN(duration)) {
-                const end = new Date(start.getTime() + duration * 60000);
-
-                const year = end.getFullYear();
-                const month = String(end.getMonth() + 1).padStart(2, '0');
-                const day = String(end.getDate()).padStart(2, '0');
-                const hours = String(end.getHours()).padStart(2, '0');
-                const minutes = String(end.getMinutes()).padStart(2, '0');
-
-                const localEnd = `${year}-${month}-${day}T${hours}:${minutes}`;
-                document.getElementById("endTime").value = localEnd;
-            }
-        });
-    </script>
-}
+</body>
+</html>
