@@ -4,6 +4,7 @@ using MES_F1.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MES_F1.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250422120726_defaultAdmin")]
+    partial class defaultAdmin
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -96,6 +99,46 @@ namespace MES_F1.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "admin-id-123",
+                            AccessFailedCount = 0,
+                            Birthday = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            ConcurrencyStamp = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+                            Email = "admin@example.com",
+                            EmailConfirmed = true,
+                            LockoutEnabled = false,
+                            Name = " ",
+                            NormalizedEmail = "ADMIN@EXAMPLE.COM",
+                            NormalizedUserName = "DEFAULTADMIN",
+                            PasswordHash = "AQAAAAIAAYagAAAAEKAGu++1cx6whmHXE4spxwVRL+k43Yb4U09MIVuMShpL2N+EKn0bZ5cuJbnAHP1cLw==",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "aaaaaaaa - aaaa - aaaa - aaaa - aaaaaaaaaaaa",
+                            Surname = " ",
+                            TwoFactorEnabled = false,
+                            UserName = "defaultadmin"
+                        },
+                        new
+                        {
+                            Id = "director-id-456",
+                            AccessFailedCount = 0,
+                            Birthday = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            ConcurrencyStamp = "dddddddd-dddd-dddd-dddd-dddddddddddd",
+                            Email = "director@example.com",
+                            EmailConfirmed = true,
+                            LockoutEnabled = false,
+                            Name = " ",
+                            NormalizedEmail = "DIRECTOR@EXAMPLE.COM",
+                            NormalizedUserName = "DEFAULTDIRECTOR",
+                            PasswordHash = "AQAAAAIAAYagAAAAEKAGu++1cx6whmHXE4spxwVRL+k43Yb4U09MIVuMShpL2N+EKn0bZ5cuJbnAHP1cLw==",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "cccccccc-cccc-cccc-cccc-cccccccccccc",
+                            Surname = " ",
+                            TwoFactorEnabled = false,
+                            UserName = "defaultdirector"
+                        });
                 });
 
             modelBuilder.Entity("MES_F1.Models.Instruction", b =>
@@ -845,6 +888,18 @@ namespace MES_F1.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetUserRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            UserId = "admin-id-123",
+                            RoleId = "role-admin-id"
+                        },
+                        new
+                        {
+                            UserId = "director-id-456",
+                            RoleId = "role-director-id"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>

@@ -1,40 +1,57 @@
 ﻿document.addEventListener("DOMContentLoaded", function () {
-    const teamId = document.getElementById("teamSelect").value;
+    const teamSelect = document.getElementById("teamSelect");
+    const calendarContainer = document.getElementById("calendarContainer");
 
-    if (teamId) {
-        loadTeamTasks(teamId);
-        loadCalendar(teamId);
+    let initialTeamId = null;
+
+    if (teamSelect && teamSelect.value) {
+        initialTeamId = teamSelect.value;
+    } else if (calendarContainer && calendarContainer.dataset.teamId) {
+        initialTeamId = calendarContainer.dataset.teamId;
     }
 
-    document.getElementById("teamSelect").addEventListener("change", function () {
-        const selectedTeamId = this.value;
-        if (selectedTeamId) {
-            loadTeamTasks(selectedTeamId);
-            loadCalendar(selectedTeamId);
-        } else {
-            document.getElementById("taskList").innerHTML = "<li>Select team for list of planned tasks.</li>";
-            document.getElementById("calendar").innerHTML = "";
-        }
-    });
+    if (initialTeamId) {
+        loadTeamTasks(initialTeamId);
+        loadCalendar(initialTeamId);
+    }
 
-    // Automatyczne uzupełnianie planowanego zakończenia
-    document.getElementById("startTime").addEventListener("change", function () {
-        const start = new Date(this.value);
-        const duration = parseInt(document.getElementById("EstimatedDurationMinutes").value);
+    if (teamSelect) {
+        teamSelect.addEventListener("change", function () {
+            const selectedTeamId = this.value;
+            if (selectedTeamId) {
+                loadTeamTasks(selectedTeamId);
+                loadCalendar(selectedTeamId);
+            } else {
+                const taskList = document.getElementById("taskList");
+                if (taskList) taskList.innerHTML = "<li>Select team for list of planned tasks.</li>";
+                document.getElementById("calendar").innerHTML = "";
+            }
+        });
+    }
 
-        if (!isNaN(start.getTime()) && !isNaN(duration)) {
-            const end = new Date(start.getTime() + duration * 60000);
+    const startTimeInput = document.getElementById("startTime");
+    const durationInput = document.getElementById("EstimatedDurationMinutes");
+    const endTimeInput = document.getElementById("endTime");
 
-            const year = end.getFullYear();
-            const month = String(end.getMonth() + 1).padStart(2, '0');
-            const day = String(end.getDate()).padStart(2, '0');
-            const hours = String(end.getHours()).padStart(2, '0');
-            const minutes = String(end.getMinutes()).padStart(2, '0');
+    if (startTimeInput && durationInput && endTimeInput) {
+        startTimeInput.addEventListener("change", function () {
+            const start = new Date(this.value);
+            const duration = parseInt(durationInput.value);
 
-            const localEnd = `${year}-${month}-${day}T${hours}:${minutes}`;
-            document.getElementById("endTime").value = localEnd;
-        }
-    });
+            if (!isNaN(start.getTime()) && !isNaN(duration)) {
+                const end = new Date(start.getTime() + duration * 60000);
+
+                const year = end.getFullYear();
+                const month = String(end.getMonth() + 1).padStart(2, '0');
+                const day = String(end.getDate()).padStart(2, '0');
+                const hours = String(end.getHours()).padStart(2, '0');
+                const minutes = String(end.getMinutes()).padStart(2, '0');
+
+                const localEnd = `${year}-${month}-${day}T${hours}:${minutes}`;
+                endTimeInput.value = localEnd;
+            }
+        });
+    }
 });
 
 function loadTeamTasks(teamId) {

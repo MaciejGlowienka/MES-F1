@@ -1,45 +1,26 @@
-﻿
-@{
-    ViewData["Title"] = "CalendarView";
-    int year = DateTime.Now.Year;
-    int month = DateTime.Now.Month;
-    DateTime firstDayOfMonth = new DateTime(year, month, 1);
-    int daysInMonth = DateTime.DaysInMonth(year, month);
-    int startDay = (int)firstDayOfMonth.DayOfWeek;
-    if (startDay == 0) startDay = 7; // Niedziela ->
-}
+﻿@using Microsoft.AspNetCore.Mvc.ModelBinding
 
-<h1>CalendarView</h1>
-
-<div class="container">
-    <h2 class="text-center mt-4">Calendar @month/@year</h2>
-    <div class="row g-2 mt-3">
-        <div class="col text-center fw-bold">Monday</div>
-        <div class="col text-center fw-bold">Tuesday</div>
-        <div class="col text-center fw-bold">Wednesday</div>
-        <div class="col text-center fw-bold">Thursday</div>
-        <div class="col text-center fw-bold">Friday</div>
-        <div class="col text-center fw-bold">Saturday</div>
-        <div class="col text-center fw-bold">Sunday</div>
-    </div>
+<html lang='en'>
+<head>
+    <meta charset='utf-8' />
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.17/index.global.min.js'></script>
+    <script src="~/js/task-edit.js"></script>
+</head>
+<body>
     @{
-        int dayCounter = 1;
-        for (int row = 0; row < 6 && dayCounter <= daysInMonth; row++)
-        {
-            <div class="row g-2">
-                @for (int col = 1; col <= 7; col++)
-                {
-                    if ((row == 0 && col < startDay) || dayCounter > daysInMonth)
-                    {
-                        <div class="col border bg-light text-center p-3"></div>
-                    }
-                    else
-                    {
-                        <div class="col border bg-light text-center p-3">@dayCounter</div>
-                        dayCounter++;
-                    }
-                }
-            </div>
-        }
+        ViewData["Title"] = "Your tasks";
     }
-</div>
+
+    @if(ViewBag.TeamId == null)
+    {
+        <h4>You are not assigned to any team. Contact your director</h4>
+    }
+    else
+    {
+        <div id="calendarContainer" data-team-id="@ViewBag.TeamId" style="margin-top: 30px;">
+            <h4>Weekly Task Schedule</h4>
+            <div id="calendar" style="max-width: 100%; height: 600px;"></div>
+        </div>
+    }
+
+</body>

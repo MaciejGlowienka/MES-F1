@@ -10,6 +10,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading;
 using System.Threading.Tasks;
+using MES_F1.Data;
 using MES_F1.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -20,6 +21,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace MES_F1.Areas.Identity.Pages.Account
@@ -32,14 +34,15 @@ namespace MES_F1.Areas.Identity.Pages.Account
         private readonly IUserStore<ApplicationUser> _userStore;
         private readonly IUserEmailStore<ApplicationUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
-
+        private readonly ApplicationDbContext _context;
 
         public RegisterModel(
             UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole> roleManager,
             IUserStore<ApplicationUser> userStore,
             SignInManager<ApplicationUser> signInManager,
-            ILogger<RegisterModel> logger)
+            ILogger<RegisterModel> logger,
+            ApplicationDbContext context)
 
         {
             _userManager = userManager;
@@ -48,7 +51,7 @@ namespace MES_F1.Areas.Identity.Pages.Account
             _emailStore = GetEmailStore();
             _signInManager = signInManager;
             _logger = logger;
-
+            _context = context;
         }
 
         /// <summary>
@@ -163,13 +166,21 @@ namespace MES_F1.Areas.Identity.Pages.Account
                 {
                     _logger.LogInformation("User created a new account with password.");
 
-                    if (!String.IsNullOrEmpty(Input.Role))
+                    string roleToAssign = string.IsNullOrEmpty(Input.Role) ? ApplicationRoles.RoleWorker : Input.Role;
+                    await _userManager.AddToRoleAsync(user, roleToAssign);
+
+                    if (roleToAssign == ApplicationRoles.RoleWorker)
                     {
-                        await _userManager.AddToRoleAsync(user, Input.Role);
-                    }
-                    else
-                    {
-                        await _userManager.AddToRoleAsync(user, ApplicationRoles.RoleWorker);
+                        var newWorker = new Worker
+                        {
+                            WorkerName = $"{Input.Name} {Input.Surname}",
+                            AccountId = user.Id,
+                            TeamId = null,
+                            TeamRoleId = null
+                        };
+
+                        _context.Workers.Add(newWorker);
+                        await _context.SaveChangesAsync();
                     }
 
                     await _signInManager.SignInAsync(user, isPersistent: false);

@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using MES_F1.Models;
 using System.Reflection.Emit;
 using Humanizer;
+using Microsoft.AspNetCore.Identity;
+using System.IO;
 
 namespace MES_F1.Data
 {
@@ -133,9 +135,28 @@ namespace MES_F1.Data
                 .HasOne(w => w.WarehouseSpot)
                 .WithMany()
                 .HasForeignKey(w => w.WarehouseSpotId)
-                .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Cascade);
 
-            
+            builder.Entity<IdentityRole>().HasData(
+                new IdentityRole
+                {
+                    Id = "role-admin-id",
+                    Name = ApplicationRoles.RoleAdmin,
+                    NormalizedName = ApplicationRoles.RoleAdmin.ToUpper()
+                },
+                new IdentityRole
+                {
+                    Id = "role-director-id",
+                    Name = ApplicationRoles.RoleDirector,
+                    NormalizedName = ApplicationRoles.RoleDirector.ToUpper()
+                },
+                new IdentityRole
+                {
+                    Id = "role-worker-id",
+                    Name = ApplicationRoles.RoleWorker,
+                    NormalizedName = ApplicationRoles.RoleWorker.ToUpper()
+                }
+            );
 
 
             builder.Entity<Worker>().HasData(

@@ -3,6 +3,7 @@ using MES_F1.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace MES_F1.Controllers
@@ -21,8 +22,26 @@ namespace MES_F1.Controllers
         }
 
         [Route("Calendar/CalendarView")]
-        public IActionResult CalendarView()
+        public async Task<IActionResult> CalendarView()
         {
+            var userId = _userManager.GetUserId(User);
+
+            var worker = await _context.Workers
+                .Include(w => w.Team)
+                .FirstOrDefaultAsync(w => w.AccountId == userId);
+
+            if (worker == null)
+            {
+                return Unauthorized();
+            }
+
+            if(worker.TeamId != null)
+            {
+                var teamId = worker.TeamId.Value;
+                ViewBag.TeamId = teamId;
+            }
+
+
             return View();
         }
     }
