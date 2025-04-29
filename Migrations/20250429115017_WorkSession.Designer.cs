@@ -4,6 +4,7 @@ using MES_F1.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MES_F1.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250429115017_WorkSession")]
+    partial class WorkSession
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -657,38 +660,6 @@ namespace MES_F1.Migrations
                     b.ToTable("WharehouseSpot");
                 });
 
-            modelBuilder.Entity("MES_F1.Models.WorkSession", b =>
-                {
-                    b.Property<int>("WorkSessionId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("WorkSessionId"));
-
-                    b.Property<DateTime?>("EndTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsCompleted")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("ProductionTaskId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("StartTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("TeamId")
-                        .HasColumnType("int");
-
-                    b.HasKey("WorkSessionId");
-
-                    b.HasIndex("ProductionTaskId");
-
-                    b.HasIndex("TeamId");
-
-                    b.ToTable("WorkSessions");
-                });
-
             modelBuilder.Entity("MES_F1.Models.Worker", b =>
                 {
                     b.Property<int>("WorkerId")
@@ -987,25 +958,6 @@ namespace MES_F1.Migrations
                     b.Navigation("Machine");
 
                     b.Navigation("Production");
-
-                    b.Navigation("Team");
-                });
-
-            modelBuilder.Entity("MES_F1.Models.WorkSession", b =>
-                {
-                    b.HasOne("MES_F1.Models.ProductionTask", "ProductionTask")
-                        .WithMany()
-                        .HasForeignKey("ProductionTaskId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("MES_F1.Models.Team", "Team")
-                        .WithMany()
-                        .HasForeignKey("TeamId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("ProductionTask");
 
                     b.Navigation("Team");
                 });

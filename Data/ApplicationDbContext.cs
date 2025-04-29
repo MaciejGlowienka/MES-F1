@@ -23,6 +23,7 @@ namespace MES_F1.Data
         public DbSet<Instruction> Instructions { get; set; }
         public DbSet<InstructionSteps> InstructionSteps { get; set; }
         public DbSet<Machine> Machines { get; set; }
+        public DbSet<WorkSession> WorkSessions { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -137,7 +138,20 @@ namespace MES_F1.Data
                 .HasForeignKey(w => w.WarehouseSpotId)
             .OnDelete(DeleteBehavior.Cascade);
 
-            builder.Entity<IdentityRole>().HasData(
+            builder.Entity<WorkSession>()
+                .HasOne(ws => ws.ProductionTask)
+                .WithMany()
+                .HasForeignKey(ws => ws.ProductionTaskId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<WorkSession>()
+                .HasOne(ws => ws.Team)
+                .WithMany()
+                .HasForeignKey(ws => ws.TeamId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
+        builder.Entity<IdentityRole>().HasData(
                 new IdentityRole
                 {
                     Id = "role-admin-id",

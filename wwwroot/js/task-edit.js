@@ -88,9 +88,7 @@ function loadCalendar(teamId) {
         .then(response => response.json())
         .then(data => {
             const calendarEl = document.getElementById("calendar");
-
-            // Czyść poprzedni kalendarz
-            calendarEl.innerHTML = "";
+            calendarEl.innerHTML = ""; // czyść poprzedni kalendarz
 
             const calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'timeGridWeek',
@@ -100,10 +98,18 @@ function loadCalendar(teamId) {
                 locale: 'en',
                 firstDay: 1,
                 events: data.map(t => ({
+                    id: t.id,       // potrzebne do kliknięcia
                     title: t.title,
                     start: t.start,
-                    end: t.end
-                }))
+                    end: t.end,
+                    color: t.isCompleted ? 'green' : '',
+                })),
+                eventClick: function (info) {
+                    const taskId = info.event.id;
+                    if (taskId) {
+                        window.location.href = `/Workplace/${taskId}`;
+                    }
+                }
             });
 
             calendar.render();

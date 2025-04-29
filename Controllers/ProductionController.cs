@@ -3,6 +3,7 @@ using MES_F1.Models;
 using MES_F1.Models.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Build.Framework;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
@@ -150,9 +151,11 @@ namespace MES_F1.Controllers
             var tasks = _context.ProductionTasks
                 .Where(t => t.TeamId == teamId && t.PlannedStartTime.HasValue && t.PlannedEndTime.HasValue)
                 .Select(t => new {
+                    id = t.ProductionTaskId, // ← potrzebne do przekierowania
                     title = t.TaskName,
                     start = t.PlannedStartTime.Value.ToString("s"),
-                    end = t.PlannedEndTime.Value.ToString("s")
+                    end = t.PlannedEndTime.Value.ToString("s"),
+                    isCompleted = t.ActualEndTime.HasValue
                 })
                 .ToList();
 
@@ -306,6 +309,99 @@ namespace MES_F1.Controllers
             return RedirectToAction("ProductionSetup", new { productionId = task.ProductionId });
         }
 
+        [HttpGet]
+        [Route("Workplace/{taskId}")]
+        public IActionResult Workplace(int taskId)
+        {
+            var task = _context.ProductionTasks
+                .Include(t => t.Production)
+                .FirstOrDefault(t => t.ProductionTaskId == taskId);
+
+            if (task == null || task.Production == null)
+            {
+                Console.WriteLine("There was an error with task id:" + taskId);
+                return NotFound();
+            }
+
+            var step = _context.InstructionSteps.FirstOrDefault(
+                i => i.InstructionId == task.Production.InstructionId &&
+                     i.InstructionStepNumber == task.InstructionStep);
+
+            if (step == null)
+            {
+                Console.WriteLine("There was an error with instruction");
+                return NotFound();
+            }
+
+            var sessions = _context.WorkSessions
+                .Where(ws => ws.ProductionTaskId == task.ProductionTaskId)
+                .ToList();
+
+            var activeSession = sessions.FirstOrDefault(ws => ws.EndTime == null);
+
+            var model = new WorkplaceViewModel
+            {
+                ProductionTask = task,
+                InstructionStep = step,
+                WorkSessions = sessions,
+                CurrentSession = activeSession
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public IActionResult StartTask(int taskId)
+        {
+            var task = _context.ProductionTasks.FirstOrDefault(t => t.ProductionTaskId == taskId);
+            if (task == null || task.TeamId == null)
+            {
+                return NotFound();
+            }
+                
+            if(task.ActualStartTime == null)
+            {
+                task.ActualStartTime = DateTime.Now;
+            }
+                
+            var newSession = new WorkSession
+            {
+                ProductionTaskId = taskId,
+                TeamId = task.TeamId.Value,
+                StartTime = DateTime.Now
+            };
+
+            _context.WorkSessions.Add(newSession);
+            _context.SaveChanges();
+
+            return RedirectToAction("Workplace", new { TaskId = taskId });
+        }
+
+        [HttpPost]
+        public IActionResult StopTask(int sessionId)
+        {
+            var session = _context.WorkSessions.FirstOrDefault(ws => ws.WorkSessionId == sessionId);
+            if (session == null)
+                return NotFound();
+
+            session.EndTime = DateTime.Now;
+            _context.SaveChanges();
+
+            return RedirectToAction("Workplace", new { TaskId = session.ProductionTaskId });
+        }
+
+        [HttpPost]
+        public IActionResult CompleteTask(int taskId)
+        {
+            var task = _context.ProductionTasks.FirstOrDefault(t => t.ProductionTaskId == taskId);
+            if (task == null)
+                return NotFound();
+
+            task.ActualEndTime = DateTime.Now;
+            _context.SaveChanges();
+
+            return RedirectToAction("Workplace", new { TaskId = taskId });
+        }
 
         [HttpPost]
         public IActionResult RemoveProduction(int ProductionId)

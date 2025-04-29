@@ -1,0 +1,124 @@
+﻿@model MES_F1.Models.ViewModels.WorkplaceViewModel
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        @Html.ValidationSummary()
+    </div>
+}
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Planned Time</th>
+            <th>Execution Time</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+                @if (Model.ProductionTask.PlannedStartTime.HasValue && Model.ProductionTask.PlannedEndTime.HasValue)
+                {
+                    @($"{Model.ProductionTask.PlannedStartTime.Value:yyyy-MM-dd HH:mm} - {Model.ProductionTask.PlannedEndTime.Value:yyyy-MM-dd HH:mm}")
+                }
+                else
+                {
+                    <span>Not planned</span>
+                }
+            </td>
+            <td>
+                @if (Model.ProductionTask.ActualStartTime.HasValue && !Model.ProductionTask.ActualEndTime.HasValue)
+                {
+                    <span>Started</span>
+                    @($"{Model.ProductionTask.ActualStartTime.Value:yyyy-MM-dd HH:mm}")
+                }
+                else if (Model.ProductionTask.ActualStartTime.HasValue && Model.ProductionTask.ActualEndTime.HasValue)
+                {
+                    <span>Started and finished</span>
+                    @($"{Model.ProductionTask.ActualStartTime.Value:yyyy-MM-dd HH:mm} - {Model.ProductionTask.ActualEndTime.Value:yyyy-MM-dd HH:mm}")
+                }
+                else
+                {
+                    <span>Not started</span>
+                }
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+@if (Model.InstructionStep != null)
+{
+    <div class="card mt-4">
+        <div class="card-header">
+            <strong>Instruction Info</strong>
+        </div>
+        <div class="card-body">
+            <p>
+                <strong>Instruction Name:</strong> @Model.InstructionStep.Instruction?.InstructionName
+            </p>
+            <p>
+                <strong>Instruction Link:</strong>
+                @if (!string.IsNullOrWhiteSpace(Model.InstructionStep.Instruction?.InstructionURL))
+                {
+                    <a href="@Model.InstructionStep.Instruction.InstructionURL" target="_blank">View Instruction</a>
+                }
+                else
+                {
+                    <span>No instruction link provided.</span>
+                }
+            </p>
+            <p>
+                <strong>Step Number:</strong> @Model.InstructionStep.InstructionStepNumber
+            </p>
+            <p>
+                <strong>Work Scope:</strong> @Model.InstructionStep.StepWorkScope
+            </p>
+            <p>
+                <strong>Description:</strong> @Model.InstructionStep.InstructionStepDescription
+            </p>
+            <p>
+                <strong>Estimated Duration:</strong> @Model.InstructionStep.EstimatedDurationMinutes minutes
+            </p>
+        </div>
+    </div>
+}
+@if (Model.ProductionTask.ActualEndTime == null)
+{
+    @if (Model.CurrentSession == null)
+    {
+        <form asp-action="StartTask" method="post">
+            <input type="hidden" name="taskId" value="@Model.ProductionTask.ProductionTaskId" />
+            <button type="submit" class="btn btn-success">Start Work</button>
+        </form>
+
+
+    }
+    else if (Model.CurrentSession.EndTime == null)
+    {
+        <p><strong>Work started at:</strong> @Model.CurrentSession.StartTime.ToString("yyyy-MM-dd HH:mm")</p>
+        <form asp-action="StopTask" method="post">
+            <input type="hidden" name="sessionId" value="@Model.CurrentSession.WorkSessionId" />
+            <button type="submit" class="btn btn-warning">Pause Work</button>
+        </form>
+    }
+
+    @if (Model.CurrentSession == null && Model.ProductionTask.ActualStartTime != null)
+    {
+        <form asp-action="CompleteTask" method="post" onsubmit="return confirmComplete();">
+            <input type="hidden" name="taskId" value="@Model.ProductionTask.ProductionTaskId" />
+            <button type="submit" class="btn btn-danger">Complete Task</button>
+        </form>
+        <script>
+            function confirmComplete() {
+                const userInput = prompt("Type 'confirm' to finish this task.");
+                return userInput && userInput.toLowerCase() === 'confirm';
+            }
+        </script>
+    }
+
+}
+else if (Model.ProductionTask.ActualEndTime != null)
+{
+    <h3>Task is already done.</h3>
+}
+

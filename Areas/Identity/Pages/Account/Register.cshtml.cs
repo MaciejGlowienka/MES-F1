@@ -135,11 +135,7 @@ namespace MES_F1.Areas.Identity.Pages.Account
 
             Input = new()
             {
-                RoleList = _roleManager.Roles.Select(x => x.Name).Select(i => new SelectListItem
-                {
-                    Text = i,
-                    Value = i
-                })
+                RoleList = GetRolesList()
             };
 
 
@@ -193,6 +189,12 @@ namespace MES_F1.Areas.Identity.Pages.Account
             }
 
             // If we got this far, something failed, redisplay form
+
+            Input = new()
+            {
+                RoleList = GetRolesList()
+            };
+
             return Page();
         }
 
@@ -217,6 +219,15 @@ namespace MES_F1.Areas.Identity.Pages.Account
                 throw new NotSupportedException("The default UI requires a user store with email support.");
             }
             return (IUserEmailStore<ApplicationUser>)_userStore;
+        }
+
+        private IEnumerable<SelectListItem> GetRolesList()
+        {
+            return _roleManager.Roles.Select(x => x.Name).Select(i => new SelectListItem
+            {
+                Text = i,
+                Value = i
+            });
         }
     }
 }
