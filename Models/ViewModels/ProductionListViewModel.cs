@@ -2,7 +2,7 @@
 {
     public class ProductionListViewModel
     {
-        public int? ProductionId { get; set; }
         public ProductionState? State { get; set; }
+        public List<Production> Productions { get; set; }
     }
 }

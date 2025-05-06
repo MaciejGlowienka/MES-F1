@@ -1,81 +1,84 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-}
-@model MES_F1.Models.ViewModels.ProductionEditViewModel
+﻿@model MES_F1.Models.ViewModels.ProductionEditViewModel
 
-<h2>@Model.ProductionName</h2>
+<head>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.7/index.global.min.js'></script>
 
-<form asp-action="ProductionEdit" method="post">
-    
-    <input type="hidden" asp-for="ProductionId"/>
+</head>
+<body>
+    <h2>@Model.ProductionName</h2>
 
-    <div class="form-group">
-        <label asp-for="State" class="control-label">State</label>
-        <select asp-for="State"
-                asp-items="Html.GetEnumSelectList<MES_F1.Models.ProductionState>()"
-                class="form-control"
-                id="stateDropdown">
-        </select>
-    </div>
+    <form asp-action="ProductionEdit" method="post">
 
-</form>
+        <input type="hidden" asp-for="ProductionId" />
 
-@foreach (ProductionTask task in ViewBag.ProductionTasks)
-{
-    <div class="task-block">
-        <p>
-            <strong>Step @task.InstructionStep:</strong> @task.TaskName
-        </p>
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Team</th>
-                    <th>Machine</th>
-                    <th>Planned Time</th>
-                    <th>Execution Time</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>@(task.Team?.TeamName ?? "N/A")</td>
-                    <td>@(task.Machine?.MachineName ?? "N/A")</td>
-                    <td>
-                        @if (task.PlannedStartTime.HasValue && task.PlannedEndTime.HasValue)
-                        {
-                            @($"{task.PlannedStartTime.Value:yyyy-MM-dd HH:mm} - {task.PlannedEndTime.Value:yyyy-MM-dd HH:mm}")
-                        }
-                        else
-                        {
-                            <span>Not planned</span>
-                        }
-                    </td>
-                    <td>
-                        @if (task.ActualStartTime.HasValue && task.ActualEndTime.HasValue)
-                        {
-                            @($"{task.ActualStartTime.Value:yyyy-MM-dd HH:mm} - {task.ActualEndTime.Value:yyyy-MM-dd HH:mm}")
-                        }
-                        else
-                        {
-                            <span>Not started</span>
-                        }
-                    </td>
-                    <td>
-                        <form asp-action="TaskEdit" method="post" style="display:inline;">
-                            <input type="hidden" name="TaskId" value="@task.ProductionTaskId" />
-                            <button type="submit" class="btn btn-sm btn-outline-primary">Edit</button>
-                        </form>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-}
+        <div class="form-group">
+            <label asp-for="State" class="control-label">State</label>
+            <select asp-for="State"
+                    asp-items="Html.GetEnumSelectList<MES_F1.Models.ProductionState>()"
+                    class="form-control"
+                    id="stateDropdown">
+            </select>
+        </div>
 
-<script>
-    document.getElementById("stateDropdown").addEventListener("change", function() {
-        this.form.submit();
-    });
-</script>
+    </form>
+
+    @foreach (ProductionTask task in ViewBag.ProductionTasks)
+    {
+        <div class="task-block">
+            <p>
+                <strong>Step @task.InstructionStep:</strong> @task.TaskName
+            </p>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Team</th>
+                        <th>Machine</th>
+                        <th>Planned Time</th>
+                        <th>Execution Time</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>@(task.Team?.TeamName ?? "N/A")</td>
+                        <td>@(task.Machine?.MachineName ?? "N/A")</td>
+                        <td>
+                            @if (task.PlannedStartTime.HasValue && task.PlannedEndTime.HasValue)
+                            {
+                                @($"{task.PlannedStartTime.Value:yyyy-MM-dd HH:mm} - {task.PlannedEndTime.Value:yyyy-MM-dd HH:mm}")
+                            }
+                            else
+                            {
+                                <span>Not planned</span>
+                            }
+                        </td>
+                        <td>
+                            @if (task.ActualStartTime.HasValue && task.ActualEndTime.HasValue)
+                            {
+                                @($"{task.ActualStartTime.Value:yyyy-MM-dd HH:mm} - {task.ActualEndTime.Value:yyyy-MM-dd HH:mm}")
+                            }
+                            else
+                            {
+                                <span>Not started</span>
+                            }
+                        </td>
+                        <td>
+                            <form asp-action="TaskEdit" method="post" style="display:inline;">
+                                <input type="hidden" name="TaskId" value="@task.ProductionTaskId" />
+                                <button type="submit" class="btn btn-sm btn-outline-primary">Edit</button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <hr />
+    <h3>Work Sessions Timeline</h3>
+    <div id="calendar" data-production-id="@Model.ProductionId" style="margin-top: 20px; max-width: 100%; height: 600px;"></div>
+
+    <script src="~/js/productionSetup.js"></script>
+
+
+</body>

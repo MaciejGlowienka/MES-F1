@@ -1,10 +1,4 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-}
-
-@model MES_F1.Models.ViewModels.ProductionListViewModel
+﻿@model MES_F1.Models.ViewModels.ProductionListViewModel
 
 <h2>Choose production state</h2>
 
@@ -15,7 +9,7 @@
             <option value="">-- Choose state --</option>
             @foreach (var state in Enum.GetValues(typeof(MES_F1.Models.ProductionState)).Cast<MES_F1.Models.ProductionState>())
             {
-                <option value="@((int)state)" selected="@(ViewBag.ProductionState == state ? "selected" : null)">
+                <option value="@((int)state)" selected="@(Model.State == state ? "selected" : null)">
                     @EnumHelper.GetDescription(state)
                 </option>
             }
@@ -23,28 +17,30 @@
     </div>
 </form>
 
-@if(ViewBag.Productions != null)
+@if (Model.Productions != null && Model.Productions.Any())
 {
-    @foreach (Production production in ViewBag.Productions)
+    @foreach (var production in Model.Productions)
     {
-
         <form asp-action="ProductionSetup" method="get">
             <hr />
-            <input type="hidden" asp-for="ProductionId" value="@production.ProductionId" />
+            <input type="hidden" name="productionId" value="@production.ProductionId" />
             <button type="submit" class="btn btn-primary">Edit</button>
             @production.Name
         </form>
 
         <form asp-action="RemoveProduction" method="post" onsubmit="return confirmDeletion()">
-            <input type="hidden" asp-for="ProductionId" value="@production.ProductionId" />
-            @if(production.State == ProductionState.None){
+            <input type="hidden" name="productionId" value="@production.ProductionId" />
+            @if (production.State == ProductionState.None)
+            {
                 <button type="submit" class="btn btn-danger btn-sm">Delete</button>
             }
         </form>
-
     }
 }
-
+else
+{
+    <p>No productions to show.</p>
+}
 
 <script>
     function confirmDeletion() {

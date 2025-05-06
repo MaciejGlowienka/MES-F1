@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MES_F1.Models.ViewModels;
 
 
 namespace MES_F1.Controllers
@@ -35,14 +36,13 @@ namespace MES_F1.Controllers
                 return Unauthorized();
             }
 
-            if(worker.TeamId != null)
+            var model = new CalendarViewModel
             {
-                var teamId = worker.TeamId.Value;
-                ViewBag.TeamId = teamId;
-            }
+                TeamId = worker.TeamId
+            };
 
 
-            return View();
+            return View(model);
         }
     }
 }

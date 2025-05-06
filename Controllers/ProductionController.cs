@@ -24,41 +24,46 @@ namespace MES_F1.Controllers
             _userManager = userManager;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(int? instructionId = null)
         {
-            ViewBag.Instructions = _context.Instructions.ToList();
-            
-            return View();
+            var model = new ProductionIndexViewModel
+            {
+                Instructions = _context.Instructions.ToList(),
+                InstructionId = instructionId
+            };
+            return View(model);
         }
 
         [HttpPost]
-        public IActionResult ProductionCreate(int InstructionId, ProductionState state)
+        public IActionResult ProductionCreate(ProductionIndexViewModel model)
         {
 
-            var Instruction = _context.Instructions.FirstOrDefault(w => w.InstructionId == InstructionId);
+            var instruction = _context.Instructions.FirstOrDefault(w => w.InstructionId == model.InstructionId);
 
-            if (Instruction == null)
+            if (instruction == null)
             {
                 return NotFound("Nie znaleziono instrukcji.");
             }
 
-            Production prod = new Production()
+            var prod = new Production()
             {
                 StartTime = DateTime.Now,
-                InstructionId = InstructionId,
-                Name = Instruction.InstructionName + " " + DateTime.Now,
-                State = state
+                InstructionId = instruction.InstructionId,
+                Name = instruction.InstructionName + " " + DateTime.Now,
+                State = model.State
             };
 
             _context.Productions.Add(prod);
             _context.SaveChanges();
             _context.Entry(prod).GetDatabaseValues();
 
-            prod.Name = Instruction.InstructionName + " " + prod.ProductionId;
+            prod.Name = instruction.InstructionName + " " + prod.ProductionId;
 
-            var steps = _context.InstructionSteps.Where(w => w.InstructionId == InstructionId).ToList();
+            var steps = _context.InstructionSteps
+                .Where(w => w.InstructionId == instruction.InstructionId)
+                .ToList();
 
-            foreach (InstructionSteps step in steps)
+            foreach (var step in steps)
             {
                 ProductionTask productionTask = new ProductionTask()
                 {
@@ -74,19 +79,17 @@ namespace MES_F1.Controllers
             return RedirectToAction("ProductionList", new { prod.State });
         }
 
-        
+
         public IActionResult ProductionList(ProductionState? state)
         {
-            ViewBag.Productions = null;
-            var model = new ProductionListViewModel();
-            if (state != null)
+            var model = new ProductionListViewModel
             {
-                ViewBag.Productions = _context.Productions.Where(w => w.State == state).ToList();
-                ViewBag.ProductionState = state;
+                State = state ?? ProductionState.None,
+                Productions = state != null
+                    ? _context.Productions.Where(w => w.State == state).ToList()
+                    : new List<Production>()
+            };
 
-                model.State = (ProductionState)state;
-            }
-            
             return View(model);
         }
 
@@ -308,6 +311,41 @@ namespace MES_F1.Controllers
 
             return RedirectToAction("ProductionSetup", new { productionId = task.ProductionId });
         }
+
+
+        [HttpGet]
+        public IActionResult GetProductionWorkSessions(int productionId)
+        {
+            var sessions = _context.WorkSessions
+                .Include(ws => ws.ProductionTask)
+                .Include(ws => ws.Team)
+                .Where(ws => ws.ProductionTask.ProductionId == productionId)
+                .ToList();
+
+            var colors = new[] { "#e74c3c", "#3498db", "#2ecc71", "#f1c40f", "#9b59b6", "#1abc9c" };
+            var colorMap = new Dictionary<int, string>();
+            int colorIndex = 0;
+
+            var events = sessions.Select(ws =>
+            {
+                if (!colorMap.ContainsKey(ws.ProductionTaskId))
+                {
+                    colorMap[ws.ProductionTaskId] = colors[colorIndex % colors.Length];
+                    colorIndex++;
+                }
+
+                return new
+                {
+                    title = $"{ws.ProductionTask.TaskName} ({ws.Team?.TeamName ?? "Team"})",
+                    start = ws.StartTime.ToString("s"),
+                    end = ws.EndTime?.ToString("s"),
+                    color = colorMap[ws.ProductionTaskId]
+                };
+            });
+
+            return Json(events);
+        }
+
 
         [HttpGet]
         [Route("Workplace/{taskId}")]

@@ -1,5 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Mvc.ModelBinding
 
+@model MES_F1.Models.ViewModels.CalendarViewModel
+
 <html lang='en'>
 <head>
     <meta charset='utf-8' />
@@ -11,7 +13,7 @@
         ViewData["Title"] = "Your tasks";
     }
 
-    @if(ViewBag.TeamId == null)
+    @if (Model.TeamId == null)
     {
         <h4>You are not assigned to any team. Contact your director</h4>
     }

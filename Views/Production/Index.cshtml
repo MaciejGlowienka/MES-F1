@@ -3,7 +3,7 @@
 *@
 @{
 }
-@model MES_F1.Models.Production
+@model MES_F1.Models.ViewModels.ProductionIndexViewModel
 
 <h2>Start parts production</h2>
 
@@ -12,9 +12,9 @@
         <label asp-for="InstructionId">Choose part:</label>
         <select asp-for="InstructionId" class="form-control" required onchange="this.form.submit()">
             <option value="">-- Choose part --</option>
-            @foreach (var Instruction in ViewBag.Instructions)
+            @foreach (var Instruction in Model.Instructions)
             {
-                <option value="@Instruction.InstructionId" selected="@(ViewBag.InstructionId == Instruction.InstructionId ? "selected" : null)">
+                <option value="@Instruction.InstructionId" selected="@(Model.InstructionId == Instruction.InstructionId ? "selected" : null)">
                     @Instruction.InstructionName
                 </option>
             }
