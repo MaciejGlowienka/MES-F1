@@ -35,10 +35,10 @@ namespace MES_F1.Controllers
         }
 
         [HttpPost]
-        public IActionResult ProductionCreate(ProductionIndexViewModel model)
+        public async Task<IActionResult> ProductionCreate(ProductionIndexViewModel model)
         {
 
-            var instruction = _context.Instructions.FirstOrDefault(w => w.InstructionId == model.InstructionId);
+            var instruction = await _context.Instructions.FirstOrDefaultAsync(w => w.InstructionId == model.InstructionId);
 
             if (instruction == null)
             {
@@ -53,15 +53,15 @@ namespace MES_F1.Controllers
                 State = model.State
             };
 
-            _context.Productions.Add(prod);
-            _context.SaveChanges();
-            _context.Entry(prod).GetDatabaseValues();
+            await _context.Productions.AddAsync(prod);
+            await _context.SaveChangesAsync();
+            await _context.Entry(prod).GetDatabaseValuesAsync();
 
             prod.Name = instruction.InstructionName + " " + prod.ProductionId;
 
-            var steps = _context.InstructionSteps
+            var steps = await _context.InstructionSteps
                 .Where(w => w.InstructionId == instruction.InstructionId)
-                .ToList();
+                .ToListAsync();
 
             foreach (var step in steps)
             {
@@ -72,9 +72,9 @@ namespace MES_F1.Controllers
                     TaskName = step.InstructionStepDescription
                 };
 
-                _context.ProductionTasks.Add(productionTask);
+                await _context.ProductionTasks.AddAsync(productionTask);
             }
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return RedirectToAction("ProductionList", new { prod.State });
         }
@@ -95,92 +95,99 @@ namespace MES_F1.Controllers
 
 
         [HttpGet]
-        public IActionResult ProductionSetup(int productionId)
+        public async Task<IActionResult> ProductionSetup(int productionId)
         {
-            var production = _context.Productions.FirstOrDefault(p => p.ProductionId == productionId);
+            var production = await _context.Productions.FirstOrDefaultAsync(p => p.ProductionId == productionId);
             if (production == null)
             {
                 return NotFound();
             }
-            var model = new ProductionEditViewModel
-            {
-                ProductionId = production.ProductionId,
-                State = production.State,
-                ProductionName = production.Name
-            };
 
-            ViewBag.ProductionTasks = _context.ProductionTasks
+            var productionTasks = await _context.ProductionTasks
                 .Include(t => t.Team)
                 .Include(t => t.Machine)
                 .Where(w => w.ProductionId == productionId)
-                .ToList();
+                .ToListAsync();
 
+            var model = new ProductionSetupViewModel
+            {
+                ProductionId = production.ProductionId,
+                State = production.State,
+                ProductionName = production.Name,
+                ProductionTasks = productionTasks
+            };
 
-                return View(model);
+            return View(model);
         }
 
+
         [HttpPost]
-        public IActionResult ProductionEdit(int productionId, ProductionState State)
+        public async Task<IActionResult> ProductionEdit(int productionId, ProductionState State)
         {
-            var prod = _context.Productions.FirstOrDefault(w => w.ProductionId == productionId);
+            var prod = await _context.Productions.FirstOrDefaultAsync(w => w.ProductionId == productionId);
+            if (prod == null)
+            {
+                return NotFound();
+            }
+
             prod.State = State;
-            _context.Productions.Update(prod);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return RedirectToAction("ProductionList", new { prod.State });
         }
 
         [HttpGet]
-        public IActionResult GetTeamTasks(int teamId)
+        public async Task<IActionResult> GetTeamTasks(int teamId)
         {
-            var teamTasks = _context.ProductionTasks
-                .Where(t => t.TeamId == teamId && t.PlannedStartTime.HasValue && t.PlannedEndTime.HasValue && t.PlannedEndTime > DateTime.Now)
+            var teamTasks = await _context.ProductionTasks
+                .Where(t => t.TeamId == teamId && 
+                            t.PlannedStartTime.HasValue && 
+                            t.PlannedEndTime.HasValue && 
+                            t.PlannedEndTime > DateTime.Now)
                 .Select(t => new
                 {
                     t.TaskName,
-                    // Sprawdzanie, czy PlannedStartTime jest null przed wywołaniem ToString
                     PlannedStartTime = t.PlannedStartTime.HasValue ? t.PlannedStartTime.Value.ToString("yyyy-MM-ddTHH:mm:ss") : null,
-                    // Sprawdzanie, czy PlannedEndTime jest null przed wywołaniem ToString
                     PlannedEndTime = t.PlannedEndTime.HasValue ? t.PlannedEndTime.Value.ToString("yyyy-MM-ddTHH:mm:ss") : null
                 })
-                .ToList();
+                .ToListAsync();
 
             return Json(teamTasks);
         }
 
         [HttpGet]
-        public IActionResult GetTeamTasksForCalendar(int teamId)
+        public async Task<IActionResult> GetTeamTasksForCalendar(int teamId)
         {
-            var tasks = _context.ProductionTasks
+            var tasks = await _context.ProductionTasks
                 .Where(t => t.TeamId == teamId && t.PlannedStartTime.HasValue && t.PlannedEndTime.HasValue)
                 .Select(t => new {
-                    id = t.ProductionTaskId, // ← potrzebne do przekierowania
+                    id = t.ProductionTaskId,
                     title = t.TaskName,
                     start = t.PlannedStartTime.Value.ToString("s"),
                     end = t.PlannedEndTime.Value.ToString("s"),
                     isCompleted = t.ActualEndTime.HasValue
                 })
-                .ToList();
+                .ToListAsync();
 
             return Json(tasks);
         }
 
         [HttpPost]
-        public IActionResult TaskEdit(int TaskId)
+        public async Task<IActionResult> TaskEdit(int TaskId)
         {
-            var task = _context.ProductionTasks
+            var task = await _context.ProductionTasks
                 .Include(t => t.Production)
                 .Include(t => t.Team)
                 .Include(t => t.Machine)
-                .FirstOrDefault(t => t.ProductionTaskId == TaskId);
+                .FirstOrDefaultAsync(t => t.ProductionTaskId == TaskId);
 
             if (task == null)
             {
                 return NotFound();
             }
 
-            var instructionStep = _context.InstructionSteps
-                .FirstOrDefault(s =>
+            var instructionStep = await _context.InstructionSteps
+                .FirstOrDefaultAsync(s =>
                     s.InstructionId == task.Production.InstructionId &&
                     s.InstructionStepNumber == task.InstructionStep);
 
@@ -195,11 +202,11 @@ namespace MES_F1.Controllers
                 MachineId = task.MachineId,
                 PlannedStartTime = task.PlannedStartTime,
                 PlannedEndTime = task.PlannedEndTime,
-                Teams = _context.Teams.ToList(),
-                Machines = _context.Machines.ToList(),
-                PreviousTask = _context.ProductionTasks.FirstOrDefault(t =>
+                Teams = await _context.Teams.ToListAsync(),
+                Machines = await _context.Machines.ToListAsync(),
+                PreviousTask = await _context.ProductionTasks.FirstOrDefaultAsync(t =>
                     t.ProductionId == task.ProductionId && t.InstructionStep == task.InstructionStep - 1),
-                NextTask = _context.ProductionTasks.FirstOrDefault(t =>
+                NextTask = await _context.ProductionTasks.FirstOrDefaultAsync(t =>
                     t.ProductionId == task.ProductionId && t.InstructionStep == task.InstructionStep + 1),
                 EstimatedDurationMinutes = duration
             };
@@ -208,16 +215,16 @@ namespace MES_F1.Controllers
         }
 
         [HttpPost]
-        public IActionResult TaskSave(TaskEditViewModel model)
+        public async Task<IActionResult> TaskSave(TaskEditViewModel model)
         {
-            var task = _context.ProductionTasks.FirstOrDefault(t => t.ProductionTaskId == model.TaskId);
+            var task = await _context.ProductionTasks.FirstOrDefaultAsync(t => t.ProductionTaskId == model.TaskId);
             if (task == null)
             {
                 return NotFound();
             }
 
             // --- Sprawdzenie kolizji z poprzednim taskiem ---
-            var previousTask = _context.ProductionTasks.FirstOrDefault(t =>
+            var previousTask = await _context.ProductionTasks.FirstOrDefaultAsync(t =>
                 t.ProductionId == task.ProductionId &&
                 t.InstructionStep == task.InstructionStep - 1);
 
@@ -230,7 +237,7 @@ namespace MES_F1.Controllers
             }
 
             // --- Sprawdzenie kolizji z następnym taskiem ---
-            var nextTask = _context.ProductionTasks.FirstOrDefault(t =>
+            var nextTask = await _context.ProductionTasks.FirstOrDefaultAsync(t =>
                 t.ProductionId == task.ProductionId &&
                 t.InstructionStep == task.InstructionStep + 1);
 
@@ -245,7 +252,7 @@ namespace MES_F1.Controllers
             // --- Sprawdzenie kolizji z innymi taskami tego samego zespołu ---
             if (model.TeamId.HasValue && model.PlannedStartTime.HasValue && model.PlannedEndTime.HasValue)
             {
-                var overlappingTasks = _context.ProductionTasks
+                var overlappingTasks = await _context.ProductionTasks
                     .Where(t =>
                         t.ProductionTaskId != model.TaskId &&
                         t.TeamId == model.TeamId &&
@@ -256,7 +263,7 @@ namespace MES_F1.Controllers
                             (model.PlannedEndTime > t.PlannedStartTime && model.PlannedEndTime <= t.PlannedEndTime) ||     // koniec w środku
                             (model.PlannedStartTime <= t.PlannedStartTime && model.PlannedEndTime >= t.PlannedEndTime)    // obejmuje inny
                         )
-                    ).ToList();
+                    ).ToListAsync();
 
                 if (overlappingTasks.Any())
                 {
@@ -273,8 +280,8 @@ namespace MES_F1.Controllers
             // --- Jeśli są błędy, wróć do widoku z komunikatami ---
             if (!ModelState.IsValid)
             {
-                model.Teams = _context.Teams.ToList();
-                model.Machines = _context.Machines.ToList();
+                model.Teams = await _context.Teams.ToListAsync();
+                model.Machines = await _context.Machines.ToListAsync();
 
 
                 return View("TaskEdit", model);
@@ -287,16 +294,16 @@ namespace MES_F1.Controllers
             task.PlannedEndTime = model.PlannedEndTime;
 
             _context.ProductionTasks.Update(task);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return RedirectToAction("ProductionSetup", new { productionId = task.ProductionId });
         }
 
 
         [HttpPost]
-        public IActionResult TaskEditSubmit(TaskEditViewModel model)
+        public async Task<IActionResult> TaskEditSubmit(TaskEditViewModel model)
         {
-            var task = _context.ProductionTasks.FirstOrDefault(t => t.ProductionTaskId == model.TaskId);
+            var task = await _context.ProductionTasks.FirstOrDefaultAsync(t => t.ProductionTaskId == model.TaskId);
 
             if (task == null)
                 return NotFound();
@@ -307,20 +314,20 @@ namespace MES_F1.Controllers
             task.PlannedEndTime = model.PlannedEndTime;
 
             _context.ProductionTasks.Update(task);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return RedirectToAction("ProductionSetup", new { productionId = task.ProductionId });
         }
 
 
         [HttpGet]
-        public IActionResult GetProductionWorkSessions(int productionId)
+        public async Task<IActionResult> GetProductionWorkSessions(int productionId)
         {
-            var sessions = _context.WorkSessions
+            var sessions = await _context.WorkSessions
                 .Include(ws => ws.ProductionTask)
                 .Include(ws => ws.Team)
                 .Where(ws => ws.ProductionTask.ProductionId == productionId)
-                .ToList();
+                .ToListAsync();
 
             var colors = new[] { "#e74c3c", "#3498db", "#2ecc71", "#f1c40f", "#9b59b6", "#1abc9c" };
             var colorMap = new Dictionary<int, string>();
@@ -349,11 +356,11 @@ namespace MES_F1.Controllers
 
         [HttpGet]
         [Route("Workplace/{taskId}")]
-        public IActionResult Workplace(int taskId)
+        public async Task<IActionResult> Workplace(int taskId)
         {
-            var task = _context.ProductionTasks
+            var task = await _context.ProductionTasks
                 .Include(t => t.Production)
-                .FirstOrDefault(t => t.ProductionTaskId == taskId);
+                .FirstOrDefaultAsync(t => t.ProductionTaskId == taskId);
 
             if (task == null || task.Production == null)
             {
@@ -361,7 +368,7 @@ namespace MES_F1.Controllers
                 return NotFound();
             }
 
-            var step = _context.InstructionSteps.FirstOrDefault(
+            var step = await _context.InstructionSteps.FirstOrDefaultAsync(
                 i => i.InstructionId == task.Production.InstructionId &&
                      i.InstructionStepNumber == task.InstructionStep);
 
@@ -371,9 +378,9 @@ namespace MES_F1.Controllers
                 return NotFound();
             }
 
-            var sessions = _context.WorkSessions
+            var sessions = await _context.WorkSessions
                 .Where(ws => ws.ProductionTaskId == task.ProductionTaskId)
-                .ToList();
+                .ToListAsync();
 
             var activeSession = sessions.FirstOrDefault(ws => ws.EndTime == null);
 
@@ -389,9 +396,9 @@ namespace MES_F1.Controllers
         }
 
         [HttpPost]
-        public IActionResult StartTask(int taskId)
+        public async Task<IActionResult> StartTask(int taskId)
         {
-            var task = _context.ProductionTasks.FirstOrDefault(t => t.ProductionTaskId == taskId);
+            var task = await _context.ProductionTasks.FirstOrDefaultAsync(t => t.ProductionTaskId == taskId);
             if (task == null || task.TeamId == null)
             {
                 return NotFound();
@@ -409,43 +416,43 @@ namespace MES_F1.Controllers
                 StartTime = DateTime.Now
             };
 
-            _context.WorkSessions.Add(newSession);
-            _context.SaveChanges();
+            await _context.WorkSessions.AddAsync(newSession);
+            await _context.SaveChangesAsync();
 
             return RedirectToAction("Workplace", new { TaskId = taskId });
         }
 
         [HttpPost]
-        public IActionResult StopTask(int sessionId)
+        public async Task<IActionResult> StopTask(int sessionId)
         {
-            var session = _context.WorkSessions.FirstOrDefault(ws => ws.WorkSessionId == sessionId);
+            var session = await _context.WorkSessions.FirstOrDefaultAsync(ws => ws.WorkSessionId == sessionId);
             if (session == null)
                 return NotFound();
 
             session.EndTime = DateTime.Now;
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return RedirectToAction("Workplace", new { TaskId = session.ProductionTaskId });
         }
 
         [HttpPost]
-        public IActionResult CompleteTask(int taskId)
+        public async Task<IActionResult> CompleteTask(int taskId)
         {
-            var task = _context.ProductionTasks.FirstOrDefault(t => t.ProductionTaskId == taskId);
+            var task = await _context.ProductionTasks.FirstOrDefaultAsync(t => t.ProductionTaskId == taskId);
             if (task == null)
                 return NotFound();
 
             task.ActualEndTime = DateTime.Now;
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return RedirectToAction("Workplace", new { TaskId = taskId });
         }
 
         [HttpPost]
-        public IActionResult RemoveProduction(int ProductionId)
+        public async Task<IActionResult> RemoveProduction(int ProductionId)
         {
-            var prod = _context.Productions.FirstOrDefault(w => w.ProductionId == ProductionId);
-            var tasks = _context.ProductionTasks.Where(w => w.ProductionId == ProductionId).ToList();
+            var prod = await _context.Productions.FirstOrDefaultAsync(w => w.ProductionId == ProductionId);
+            var tasks = await _context.ProductionTasks.Where(w => w.ProductionId == ProductionId).ToListAsync();
             if (prod == null)
             {
                 return NotFound();
@@ -457,7 +464,7 @@ namespace MES_F1.Controllers
             }
 
             _context.Productions.Remove(prod);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] = "Production has been removed.";
             return RedirectToAction("ProductionList", new {prod.State});

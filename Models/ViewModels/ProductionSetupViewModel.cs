@@ -6,6 +6,6 @@
         public string ProductionName { get; set; }
         public ProductionState State { get; set; }
 
-        public List<ProductionTask> Tasks { get; set; }
+        public List<ProductionTask> ProductionTasks { get; set; }
     }
 }

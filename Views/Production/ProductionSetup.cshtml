@@ -1,4 +1,4 @@
-﻿@model MES_F1.Models.ViewModels.ProductionEditViewModel
+﻿@model MES_F1.Models.ViewModels.ProductionSetupViewModel
 
 <head>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.7/index.global.min.js'></script>
@@ -22,7 +22,7 @@
 
     </form>
 
-    @foreach (ProductionTask task in ViewBag.ProductionTasks)
+    @foreach (ProductionTask task in Model.ProductionTasks)
     {
         <div class="task-block">
             <p>
@@ -73,7 +73,7 @@
             </table>
         </div>
     }
-
+    Q
     <hr />
     <h3>Work Sessions Timeline</h3>
     <div id="calendar" data-production-id="@Model.ProductionId" style="margin-top: 20px; max-width: 100%; height: 600px;"></div>
