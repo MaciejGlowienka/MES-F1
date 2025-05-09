@@ -1,27 +1,20 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-}
-
-@model MES_F1.Models.ViewModels.TeamAssignViewModel;
+﻿@model MES_F1.Models.ViewModels.TeamAssignPageViewModel
 
 @if (TempData["SuccessMessage"] != null)
 {
     <div class="alert alert-success">@TempData["SuccessMessage"]</div>
 }
 
-
 <h2>Choose team</h2>
 
 <form asp-action="TeamDisplay" method="post">
     <div>
-        <label asp-for="TeamId">Team:</label>
-        <select asp-for="TeamId" class="form-control" required onchange="this.form.submit()">
+        <label for="TeamId">Team:</label>
+        <select name="TeamId" class="form-control" required onchange="this.form.submit()">
             <option value="">-- Choose team --</option>
-            @foreach (var team in ViewBag.Teams)
+            @foreach (var team in Model.Teams)
             {
-                <option value="@team.TeamId" selected="@(ViewBag.TeamId == team.TeamId ? "selected" : null)">
+                <option value="@team.TeamId" selected="@(Model.SelectedTeamId == team.TeamId ? "selected" : null)">
                     @team.TeamName
                 </option>
             }
@@ -29,17 +22,13 @@
     </div>
 </form>
 
+<div>
+    <a asp-action="CreateTeam" class="btn btn-primary mt-3">Create New Team</a>
+</div>
 
-
-    <div>
-        <a asp-action="CreateTeam" class="btn btn-primary">Create New Team</a>
-    </div>
-
-
-
-@if (ViewBag.TeamId != null)
+@if (Model.SelectedTeamId.HasValue)
 {
-    <table class="table">
+    <table class="table mt-4">
         <thead>
             <tr>
                 <th>Team name</th>
@@ -49,11 +38,11 @@
         </thead>
         <tbody>
             <tr>
-                <td>@ViewBag.TeamName</td>
-                <td>@ViewBag.TeamWorkScope</td>
+                <td>@Model.TeamName</td>
+                <td>@Model.TeamWorkScope</td>
                 <td>
                     <form asp-action="RemoveTeam" method="post" onsubmit="return confirm('Do you want to remove this team?');">
-                        <input type="hidden" asp-for="TeamId" value="@ViewBag.TeamId" />
+                        <input type="hidden" name="TeamId" value="@Model.SelectedTeamId" />
                         <button type="submit" class="btn btn-danger btn-sm">Delete this team</button>
                     </form>
                 </td>
@@ -61,7 +50,7 @@
         </tbody>
     </table>
 
-    @if (ViewBag.WorkersWithRoles != null && ViewBag.WorkersWithRoles.Count > 0)
+    @if (Model.WorkersWithRoles != null && Model.WorkersWithRoles.Count > 0)
     {
         <h4>Workers in this team</h4>
         <table class="table">
@@ -73,15 +62,15 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var worker in ViewBag.WorkersWithRoles)
+                @foreach (var worker in Model.WorkersWithRoles)
                 {
                     <tr>
                         <td>@worker.WorkerName</td>
                         <td>@worker.RoleName</td>
                         <td>
                             <form asp-action="RemoveWorkerFromTeam" method="post">
-                                <input type="hidden" asp-for="TeamId" value="@ViewBag.TeamId" />
-                                <input type="hidden" asp-for="WorkerId" value="@worker.WorkerId" />
+                                <input type="hidden" name="TeamId" value="@Model.SelectedTeamId" />
+                                <input type="hidden" name="WorkerId" value="@worker.WorkerId" />
                                 <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                             </form>
                         </td>
@@ -95,36 +84,36 @@
         <p>There are no workers assigned to this team.</p>
     }
 
-    <h3>Add new worker to a team</h3>
+    <h3 class="mt-4">Add new worker to a team</h3>
 
     <form asp-action="TeamWorkerAssign" method="post">
-        <input type="hidden" asp-for="TeamId" value="@ViewBag.TeamId" />
+        <input type="hidden" asp-for="Assignment.TeamId" value="@Model.SelectedTeamId" />
 
         <div>
-            <label asp-for="WorkerId">Worker:</label>
-            <select asp-for="WorkerId" class="form-control">
+            <label asp-for="Assignment.WorkerId">Worker:</label>
+            <select asp-for="Assignment.WorkerId" class="form-control">
                 <option value="">-- Choose worker --</option>
-                @foreach (var worker in ViewBag.Workers)
+                @foreach (var worker in Model.AvailableWorkers)
                 {
                     <option value="@worker.WorkerId">@worker.WorkerName</option>
                 }
             </select>
-            <span asp-validation-for="WorkerId" class="text-danger"></span>
+            <span asp-validation-for="Assignment.WorkerId" class="text-danger"></span>
         </div>
 
         <div>
-            <label asp-for="TeamRoleId">Role:</label>
-            <select asp-for="TeamRoleId" class="form-control">
+            <label asp-for="Assignment.TeamRoleId">Role:</label>
+            <select asp-for="Assignment.TeamRoleId" class="form-control">
                 <option value="">-- Choose role --</option>
-                @foreach (var role in ViewBag.TeamRoles)
+                @foreach (var role in Model.TeamRoles)
                 {
                     <option value="@role.TeamRoleId">@role.RoleDescription</option>
                 }
             </select>
-            <span asp-validation-for="TeamRoleId" class="text-danger"></span>
+            <span asp-validation-for="Assignment.TeamRoleId" class="text-danger"></span>
         </div>
 
-        <button type="submit" class="btn btn-primary">Assign</button>
+        <button type="submit" class="btn btn-primary mt-2">Assign</button>
     </form>
 }
 

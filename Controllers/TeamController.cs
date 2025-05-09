@@ -22,45 +22,50 @@ namespace MES_F1.Controllers
         }
 
         [Route("Team/TeamAssign")]
-        public IActionResult TeamAssign(int? teamId)
+        public async Task<IActionResult> TeamAssign(int? teamId)
         {
-            ViewBag.Teams = _context.Teams.ToList();
-            ViewBag.Workers = _context.Workers.Where(w => w.TeamId == null).ToList();
-            ViewBag.TeamRoles = _context.TeamRoles.ToList();
-
-
-            if (teamId != null)
+            var viewModel = new TeamAssignPageViewModel
             {
-                var team = _context.Teams.FirstOrDefault(t => t.TeamId == teamId);
-                ViewBag.TeamName = team.TeamName;
-                ViewBag.TeamWorkScope = EnumHelper.GetDescription(team.TeamWorkScope);
-                ViewBag.TeamId = teamId;
-                ViewBag.WorkersWithRoles = GetWorkerWithRoles((int)teamId);
+                Teams = await _context.Teams.ToListAsync(),
+                AvailableWorkers = await _context.Workers.Where(w => w.TeamId == null).ToListAsync(),
+                TeamRoles = await _context.TeamRoles.ToListAsync()
+            };
+
+            if (teamId.HasValue)
+            {
+                var team = await _context.Teams.FirstOrDefaultAsync(t => t.TeamId == teamId);
+                if (team != null)
+                {
+                    viewModel.TeamName = team.TeamName;
+                    viewModel.TeamWorkScope = EnumHelper.GetDescription(team.TeamWorkScope);
+                    viewModel.SelectedTeamId = team.TeamId;
+                    viewModel.WorkersWithRoles = await GetWorkerWithRolesAsync(team.TeamId);
+                }
             }
 
-            return View();
+            return View(viewModel);
         }
 
         [HttpPost]
-        public IActionResult TeamWorkerAssign(TeamAssignViewModel model)
+        public async Task<IActionResult> TeamWorkerAssign([Bind(Prefix = "Assignment")] TeamAssignViewModel model)
         {
-
             if (!ModelState.IsValid)
             {
-                return RedirectToAction("TeamAssign");
+                // Możesz przekazać TeamId jako route param do powrotu na stronę TeamAssign
+                return RedirectToAction("TeamAssign", new { teamId = model.TeamId });
             }
 
-            var worker = _context.Workers.FirstOrDefault(w => w.WorkerId == model.WorkerId);
-
+            var worker = await _context.Workers.FirstOrDefaultAsync(w => w.WorkerId == model.WorkerId);
             if (worker != null)
             {
                 worker.TeamId = model.TeamId;
                 worker.TeamRoleId = model.TeamRoleId;
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
             }
 
-            return RedirectToAction("TeamAssign", new { model.TeamId });
+            return RedirectToAction("TeamAssign", new { teamId = model.TeamId });
         }
+
 
 
         [HttpPost]
@@ -70,76 +75,80 @@ namespace MES_F1.Controllers
         }
 
         [HttpPost]
-        public IActionResult RemoveWorkerFromTeam(int TeamId, int WorkerId)
+        public async Task<IActionResult> RemoveWorkerFromTeam(int TeamId, int WorkerId)
         {
-            var worker = _context.Workers.FirstOrDefault(w => w.WorkerId == WorkerId);
-
+            var worker = await _context.Workers.FirstOrDefaultAsync(w => w.WorkerId == WorkerId);
             if (worker != null)
             {
                 worker.TeamId = null;
                 worker.TeamRoleId = null;
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
             }
 
             return RedirectToAction("TeamAssign", new { TeamId });
         }
 
         [HttpPost]
-        public IActionResult RemoveTeam(int TeamId)
+        public async Task<IActionResult> RemoveTeam(int TeamId)
         {
-            var team = _context.Teams.FirstOrDefault(t => t.TeamId == TeamId);
-            var workers = _context.Workers.Where(w => w.TeamId == TeamId).ToList();
+            var team = await _context.Teams.FirstOrDefaultAsync(t => t.TeamId == TeamId);
             if (team == null)
             {
                 return NotFound();
             }
 
+            var workers = await _context.Workers.Where(w => w.TeamId == TeamId).ToListAsync();
             foreach (var worker in workers)
             {
                 worker.TeamId = null;
-                _context.Workers.Update(worker);
             }
 
+            var ProductionTasks = await _context.ProductionTasks.Where(w => w.TeamId == TeamId).ToListAsync();
+            foreach (var Task in ProductionTasks)
+            {
+                var Id = TeamId;
+                Task.TeamId = Id;
+            }
+
+
             _context.Teams.Remove(team);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] = "Team has been removed.";
             return RedirectToAction("TeamAssign");
         }
 
-
-        public object GetWorkerWithRoles(int TeamId)
+        private async Task<List<WorkerWithRoleViewModel>> GetWorkerWithRolesAsync(int teamId)
         {
-            return _context.Workers
-                            .Where(w => w.TeamId == TeamId)
-                            .Select(w => new
-                            {
-                                WorkerId = w.WorkerId,
-                                WorkerName = w.WorkerName,
-                                RoleId = w.TeamRoleId,
-                                RoleName = w.TeamRole != null ? w.TeamRole.RoleName : "Brak roli"
-                            })
-                            .ToList();
+            return await _context.Workers
+                .Where(w => w.TeamId == teamId)
+                .Select(w => new WorkerWithRoleViewModel
+                {
+                    WorkerId = w.WorkerId,
+                    WorkerName = w.WorkerName,
+                    RoleId = w.TeamRoleId,
+                    RoleName = w.TeamRole != null ? w.TeamRole.RoleName : "Brak roli"
+                })
+                .ToListAsync();
         }
-        
+
         public IActionResult CreateTeam()
         {
             return View();
         }
 
         [HttpPost]
-        public IActionResult CreateTeam(string TeamName, WorkScope TeamWorkScope)
+        public async Task<IActionResult> CreateTeam(string TeamName, WorkScope TeamWorkScope)
         {
-            if (TeamName != null || TeamWorkScope != null) 
+            if (!string.IsNullOrWhiteSpace(TeamName))
             {
                 var team = new Team(TeamName, TeamWorkScope);
                 _context.Teams.Add(team);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = "Team has been successfully created.";
             }
 
             return RedirectToAction("TeamAssign");
         }
-
     }
 }
