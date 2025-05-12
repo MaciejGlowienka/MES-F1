@@ -81,8 +81,28 @@
             </p>
         </div>
     </div>
+    @if (Model.WorkersDuringTask.Any())
+    {
+        <div class="card mt-4">
+            <div class="card-header">
+                <strong>Workers Assigned During Task</strong>
+            </div>
+            <ul class="list-group list-group-flush">
+                @foreach (var worker in Model.WorkersDuringTask)
+                {
+                    <li class="list-group-item">
+                        @worker.WorkerName (@worker.TeamRole.RoleName)
+                    </li>
+                }
+            </ul>
+        </div>
+    }
+    else
+    {
+        <p>No workers were assigned to the team during this task.</p>
+    }
 }
-@if (Model.ProductionTask.ActualEndTime == null)
+@if (Model.ProductionTask.ActualEndTime == null && Model.OnlyForView == false)
 {
     @if (Model.CurrentSession == null)
     {

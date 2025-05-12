@@ -12,6 +12,7 @@ namespace MES_F1.Models
 
         public WorkScope TeamWorkScope { get; set; } = 0;
 
+        public bool IsArchived { get; set; } = false;
 
         public Team() { }
 

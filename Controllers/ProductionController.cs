@@ -7,6 +7,7 @@ using Microsoft.Build.Framework;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
+using System.Threading.Tasks;
 
 namespace MES_F1.Controllers
 {
@@ -80,14 +81,14 @@ namespace MES_F1.Controllers
         }
 
 
-        public IActionResult ProductionList(ProductionState? state)
+        public IActionResult ProductionList(ProductionState state = 0)
         {
+
             var model = new ProductionListViewModel
             {
-                State = state ?? ProductionState.None,
-                Productions = state != null
-                    ? _context.Productions.Where(w => w.State == state).ToList()
-                    : new List<Production>()
+                State = state,
+                Productions = _context.Productions.Where(w => w.State == state).ToList()
+
             };
 
             return View(model);
@@ -353,10 +354,7 @@ namespace MES_F1.Controllers
             return Json(events);
         }
 
-
-        [HttpGet]
-        [Route("Workplace/{taskId}")]
-        public async Task<IActionResult> Workplace(int taskId)
+        private async Task<WorkplaceViewModel?> BuildWorkplaceViewModelAsync(int taskId, bool onlyForView = false)
         {
             var task = await _context.ProductionTasks
                 .Include(t => t.Production)
@@ -365,7 +363,7 @@ namespace MES_F1.Controllers
             if (task == null || task.Production == null)
             {
                 Console.WriteLine("There was an error with task id:" + taskId);
-                return NotFound();
+                return null;
             }
 
             var step = await _context.InstructionSteps.FirstOrDefaultAsync(
@@ -375,7 +373,7 @@ namespace MES_F1.Controllers
             if (step == null)
             {
                 Console.WriteLine("There was an error with instruction");
-                return NotFound();
+                return null;
             }
 
             var sessions = await _context.WorkSessions
@@ -384,16 +382,45 @@ namespace MES_F1.Controllers
 
             var activeSession = sessions.FirstOrDefault(ws => ws.EndTime == null);
 
-            var model = new WorkplaceViewModel
+            var workerSessions = await _context.WorkerTeamHistories
+                .Include(wth => wth.Worker)
+                .Include(wth => wth.TeamRole)
+                .Where(wth =>
+                    wth.TeamId == task.TeamId &&
+                    wth.AssignedAt <= (task.ActualEndTime ?? DateTime.Now) &&
+                    (wth.UnassignedAt == null || wth.UnassignedAt >= (task.ActualStartTime ?? DateTime.Now)))
+                .ToListAsync();
+
+            return new WorkplaceViewModel
             {
                 ProductionTask = task,
                 InstructionStep = step,
                 WorkSessions = sessions,
-                CurrentSession = activeSession
+                CurrentSession = activeSession,
+                WorkersDuringTask = workerSessions.Select(w => w.Worker).Distinct().ToList(),
+                OnlyForView = onlyForView
             };
+        }
+
+        [HttpGet]
+        [Route("Workplace/{taskId}")]
+        public async Task<IActionResult> Workplace(int taskId)
+        {
+            var model = await BuildWorkplaceViewModelAsync(taskId);
+            if (model == null) return NotFound();
 
             return View(model);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> Details(int taskId)
+        {
+            var model = await BuildWorkplaceViewModelAsync(taskId, onlyForView: true);
+            if (model == null) return NotFound();
+
+            return View("Workplace", model);
+        }
+        
 
         [HttpPost]
         public async Task<IActionResult> StartTask(int taskId)

@@ -6,7 +6,6 @@
     <div>
         <label asp-for="State">Production State:</label>
         <select asp-for="State" class="form-control" required onchange="this.form.submit()">
-            <option value="">-- Choose state --</option>
             @foreach (var state in Enum.GetValues(typeof(MES_F1.Models.ProductionState)).Cast<MES_F1.Models.ProductionState>())
             {
                 <option value="@((int)state)" selected="@(Model.State == state ? "selected" : null)">

@@ -26,7 +26,7 @@ namespace MES_F1.Controllers
         {
             var viewModel = new TeamAssignPageViewModel
             {
-                Teams = await _context.Teams.ToListAsync(),
+                Teams = await _context.Teams.Where(t => !t.IsArchived).ToListAsync(),
                 AvailableWorkers = await _context.Workers.Where(w => w.TeamId == null).ToListAsync(),
                 TeamRoles = await _context.TeamRoles.ToListAsync()
             };
@@ -58,8 +58,28 @@ namespace MES_F1.Controllers
             var worker = await _context.Workers.FirstOrDefaultAsync(w => w.WorkerId == model.WorkerId);
             if (worker != null)
             {
+                var previousHistory = await _context.WorkerTeamHistories
+                    .Where(h => h.WorkerId == worker.WorkerId && h.UnassignedAt == null)
+                    .FirstOrDefaultAsync();
+
+                if (previousHistory != null)
+                {
+                    previousHistory.UnassignedAt = DateTime.UtcNow;
+                }
+
+                // Aktualne przypisanie
                 worker.TeamId = model.TeamId;
                 worker.TeamRoleId = model.TeamRoleId;
+
+                // Nowy wpis do historii
+                _context.WorkerTeamHistories.Add(new WorkerTeamHistory
+                {
+                    WorkerId = worker.WorkerId,
+                    TeamId = model.TeamId,
+                    TeamRoleId = model.TeamRoleId,
+                    AssignedAt = DateTime.UtcNow
+                });
+
                 await _context.SaveChangesAsync();
             }
 
@@ -80,6 +100,14 @@ namespace MES_F1.Controllers
             var worker = await _context.Workers.FirstOrDefaultAsync(w => w.WorkerId == WorkerId);
             if (worker != null)
             {
+                var history = await _context.WorkerTeamHistories
+                    .Where(h => h.WorkerId == worker.WorkerId && h.UnassignedAt == null)
+                    .FirstOrDefaultAsync();
+
+                if (history != null)
+                {
+                    history.UnassignedAt = DateTime.UtcNow;
+                }
                 worker.TeamId = null;
                 worker.TeamRoleId = null;
                 await _context.SaveChangesAsync();
@@ -92,29 +120,30 @@ namespace MES_F1.Controllers
         public async Task<IActionResult> RemoveTeam(int TeamId)
         {
             var team = await _context.Teams.FirstOrDefaultAsync(t => t.TeamId == TeamId);
-            if (team == null)
-            {
-                return NotFound();
-            }
+            if (team == null) return NotFound();
 
-            var workers = await _context.Workers.Where(w => w.TeamId == TeamId).ToListAsync();
+            team.IsArchived = true;
+
+            var workers = await _context.Workers.Where(w => w.TeamId == team.TeamId).ToListAsync();
+
             foreach (var worker in workers)
             {
+                var history = await _context.WorkerTeamHistories
+                    .Where(h => h.WorkerId == worker.WorkerId && h.UnassignedAt == null)
+                    .FirstOrDefaultAsync();
+
+                if (history != null)
+                {
+                    history.UnassignedAt = DateTime.UtcNow;
+                }
+
                 worker.TeamId = null;
+                worker.TeamRoleId = null;
             }
 
-            var ProductionTasks = await _context.ProductionTasks.Where(w => w.TeamId == TeamId).ToListAsync();
-            foreach (var Task in ProductionTasks)
-            {
-                var Id = TeamId;
-                Task.TeamId = Id;
-            }
-
-
-            _context.Teams.Remove(team);
             await _context.SaveChangesAsync();
 
-            TempData["SuccessMessage"] = "Team has been removed.";
+            TempData["SuccessMessage"] = "Team has been archived.";
             return RedirectToAction("TeamAssign");
         }
 
