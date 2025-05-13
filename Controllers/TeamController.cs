@@ -1,12 +1,14 @@
 ﻿using MES_F1.Data;
 using MES_F1.Models;
 using MES_F1.Models.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace MES_F1.Controllers
 {
+    [Authorize]
     public class TeamController : Controller
     {
 
@@ -21,6 +23,7 @@ namespace MES_F1.Controllers
             _userManager = userManager;
         }
 
+        [Authorize(Roles = "Director,Admin")]
         [Route("Team/TeamAssign")]
         public async Task<IActionResult> TeamAssign(int? teamId)
         {
@@ -46,6 +49,7 @@ namespace MES_F1.Controllers
             return View(viewModel);
         }
 
+        [Authorize(Roles = "Director,Admin")]
         [HttpPost]
         public async Task<IActionResult> TeamWorkerAssign([Bind(Prefix = "Assignment")] TeamAssignViewModel model)
         {
@@ -87,13 +91,14 @@ namespace MES_F1.Controllers
         }
 
 
-
+        [Authorize(Roles = "Director,Admin")]
         [HttpPost]
         public IActionResult TeamDisplay(int TeamId)
         {
             return RedirectToAction("TeamAssign", new { TeamId });
         }
 
+        [Authorize(Roles = "Director,Admin")]
         [HttpPost]
         public async Task<IActionResult> RemoveWorkerFromTeam(int TeamId, int WorkerId)
         {
@@ -116,6 +121,7 @@ namespace MES_F1.Controllers
             return RedirectToAction("TeamAssign", new { TeamId });
         }
 
+        [Authorize(Roles = "Director,Admin")]
         [HttpPost]
         public async Task<IActionResult> RemoveTeam(int TeamId)
         {
@@ -147,6 +153,7 @@ namespace MES_F1.Controllers
             return RedirectToAction("TeamAssign");
         }
 
+        [Authorize(Roles = "Director,Admin")]
         private async Task<List<WorkerWithRoleViewModel>> GetWorkerWithRolesAsync(int teamId)
         {
             return await _context.Workers
@@ -161,11 +168,13 @@ namespace MES_F1.Controllers
                 .ToListAsync();
         }
 
+        [Authorize(Roles = "Director,Admin")]
         public IActionResult CreateTeam()
         {
             return View();
         }
 
+        [Authorize(Roles = "Director,Admin")]
         [HttpPost]
         public async Task<IActionResult> CreateTeam(string TeamName, WorkScope TeamWorkScope)
         {

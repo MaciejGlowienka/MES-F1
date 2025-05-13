@@ -1,6 +1,7 @@
 ﻿using MES_F1.Data;
 using MES_F1.Models;
 using MES_F1.Models.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Build.Framework;
@@ -11,6 +12,7 @@ using System.Threading.Tasks;
 
 namespace MES_F1.Controllers
 {
+    [Authorize]
     public class ProductionController : Controller
     {
 
@@ -25,6 +27,7 @@ namespace MES_F1.Controllers
             _userManager = userManager;
         }
 
+        [Authorize(Roles = "Director,Admin")]
         public IActionResult Index(int? instructionId = null)
         {
             var model = new ProductionIndexViewModel
@@ -35,6 +38,7 @@ namespace MES_F1.Controllers
             return View(model);
         }
 
+        [Authorize(Roles = "Director,Admin")]
         [HttpPost]
         public async Task<IActionResult> ProductionCreate(ProductionIndexViewModel model)
         {
@@ -80,7 +84,7 @@ namespace MES_F1.Controllers
             return RedirectToAction("ProductionList", new { prod.State });
         }
 
-
+        [Authorize(Roles = "Director,Admin")]
         public IActionResult ProductionList(ProductionState state = 0)
         {
 
@@ -94,7 +98,7 @@ namespace MES_F1.Controllers
             return View(model);
         }
 
-
+        [Authorize(Roles = "Director,Admin")]
         [HttpGet]
         public async Task<IActionResult> ProductionSetup(int productionId)
         {
@@ -121,7 +125,7 @@ namespace MES_F1.Controllers
             return View(model);
         }
 
-
+        [Authorize(Roles = "Director,Admin")]
         [HttpPost]
         public async Task<IActionResult> ProductionEdit(int productionId, ProductionState State)
         {
@@ -136,6 +140,7 @@ namespace MES_F1.Controllers
 
             return RedirectToAction("ProductionList", new { prod.State });
         }
+
 
         [HttpGet]
         public async Task<IActionResult> GetTeamTasks(int teamId)
@@ -173,6 +178,7 @@ namespace MES_F1.Controllers
             return Json(tasks);
         }
 
+        [Authorize(Roles = "Director,Admin")]
         [HttpPost]
         public async Task<IActionResult> TaskEdit(int TaskId)
         {
@@ -215,6 +221,7 @@ namespace MES_F1.Controllers
             return View("TaskEdit", model);
         }
 
+        [Authorize(Roles = "Director,Admin")]
         [HttpPost]
         public async Task<IActionResult> TaskSave(TaskEditViewModel model)
         {
@@ -300,27 +307,27 @@ namespace MES_F1.Controllers
             return RedirectToAction("ProductionSetup", new { productionId = task.ProductionId });
         }
 
+        //[Authorize(Roles = "Director,Admin")]
+        //[HttpPost]
+        //public async Task<IActionResult> TaskEditSubmit(TaskEditViewModel model)
+        //{
+        //    var task = await _context.ProductionTasks.FirstOrDefaultAsync(t => t.ProductionTaskId == model.TaskId);
 
-        [HttpPost]
-        public async Task<IActionResult> TaskEditSubmit(TaskEditViewModel model)
-        {
-            var task = await _context.ProductionTasks.FirstOrDefaultAsync(t => t.ProductionTaskId == model.TaskId);
+        //    if (task == null)
+        //        return NotFound();
 
-            if (task == null)
-                return NotFound();
+        //    task.TeamId = model.TeamId;
+        //    task.MachineId = model.MachineId;
+        //    task.PlannedStartTime = model.PlannedStartTime;
+        //    task.PlannedEndTime = model.PlannedEndTime;
 
-            task.TeamId = model.TeamId;
-            task.MachineId = model.MachineId;
-            task.PlannedStartTime = model.PlannedStartTime;
-            task.PlannedEndTime = model.PlannedEndTime;
+        //    _context.ProductionTasks.Update(task);
+        //    await _context.SaveChangesAsync();
 
-            _context.ProductionTasks.Update(task);
-            await _context.SaveChangesAsync();
+        //    return RedirectToAction("ProductionSetup", new { productionId = task.ProductionId });
+        //}
 
-            return RedirectToAction("ProductionSetup", new { productionId = task.ProductionId });
-        }
-
-
+        [Authorize(Roles = "Worker,Director,Admin")]
         [HttpGet]
         public async Task<IActionResult> GetProductionWorkSessions(int productionId)
         {
@@ -354,6 +361,7 @@ namespace MES_F1.Controllers
             return Json(events);
         }
 
+        [Authorize(Roles = "Worker,Director,Admin")]
         private async Task<WorkplaceViewModel?> BuildWorkplaceViewModelAsync(int taskId, bool onlyForView = false)
         {
             var task = await _context.ProductionTasks
@@ -402,6 +410,7 @@ namespace MES_F1.Controllers
             };
         }
 
+        [Authorize(Roles = "Worker,Director,Admin")]
         [HttpGet]
         [Route("Workplace/{taskId}")]
         public async Task<IActionResult> Workplace(int taskId)
@@ -412,6 +421,7 @@ namespace MES_F1.Controllers
             return View(model);
         }
 
+        [Authorize(Roles = "Director,Admin")]
         [HttpPost]
         public async Task<IActionResult> Details(int taskId)
         {
@@ -420,8 +430,8 @@ namespace MES_F1.Controllers
 
             return View("Workplace", model);
         }
-        
 
+        [Authorize(Roles = "Worker,Admin")]
         [HttpPost]
         public async Task<IActionResult> StartTask(int taskId)
         {
@@ -449,6 +459,7 @@ namespace MES_F1.Controllers
             return RedirectToAction("Workplace", new { TaskId = taskId });
         }
 
+        [Authorize(Roles = "Worker,Admin")]
         [HttpPost]
         public async Task<IActionResult> StopTask(int sessionId)
         {
@@ -462,6 +473,7 @@ namespace MES_F1.Controllers
             return RedirectToAction("Workplace", new { TaskId = session.ProductionTaskId });
         }
 
+        [Authorize(Roles = "Worker,Admin")]
         [HttpPost]
         public async Task<IActionResult> CompleteTask(int taskId)
         {
@@ -475,6 +487,7 @@ namespace MES_F1.Controllers
             return RedirectToAction("Workplace", new { TaskId = taskId });
         }
 
+        [Authorize(Roles = "Director,Admin")]
         [HttpPost]
         public async Task<IActionResult> RemoveProduction(int ProductionId)
         {

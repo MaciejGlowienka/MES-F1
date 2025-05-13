@@ -9,6 +9,7 @@ using MES_F1.Models.ViewModels;
 
 namespace MES_F1.Controllers
 {
+    [Authorize]
     public class CalendarController : Controller
     {
         private readonly ILogger<CalendarController> _logger;
@@ -22,6 +23,7 @@ namespace MES_F1.Controllers
             _userManager = userManager;
         }
 
+        [Authorize(Roles = "Worker,Admin")]
         [Route("Calendar/CalendarView")]
         public async Task<IActionResult> CalendarView()
         {
