@@ -395,8 +395,8 @@ namespace MES_F1.Controllers
                 .Include(wth => wth.TeamRole)
                 .Where(wth =>
                     wth.TeamId == task.TeamId &&
-                    wth.AssignedAt <= (task.ActualEndTime ?? DateTime.Now) &&
-                    (wth.UnassignedAt == null || wth.UnassignedAt >= (task.ActualStartTime ?? DateTime.Now)))
+                    wth.AssignedAt <= (task.ActualEndTime ?? task.PlannedEndTime ?? DateTime.Now) &&
+                    (wth.UnassignedAt == null || wth.UnassignedAt >= (task.ActualStartTime ?? task.PlannedStartTime ?? DateTime.Now)))
                 .ToListAsync();
 
             return new WorkplaceViewModel
@@ -405,7 +405,16 @@ namespace MES_F1.Controllers
                 InstructionStep = step,
                 WorkSessions = sessions,
                 CurrentSession = activeSession,
-                WorkersDuringTask = workerSessions.Select(w => w.Worker).Distinct().ToList(),
+                WorkersDuringTask = workerSessions
+                    .Select(wth => new WorkerWithRoleViewModel
+                    {
+                        WorkerId = wth.Worker.WorkerId,
+                        WorkerName = wth.Worker.WorkerName,
+                        RoleId = wth.TeamRoleId,
+                        RoleName = wth.TeamRole.RoleName
+                    })
+                    .DistinctBy(w => w.WorkerId) // wymaga: using System.Linq;
+                    .ToList(),
                 OnlyForView = onlyForView
             };
         }

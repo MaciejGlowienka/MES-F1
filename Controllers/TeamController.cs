@@ -68,7 +68,7 @@ namespace MES_F1.Controllers
 
                 if (previousHistory != null)
                 {
-                    previousHistory.UnassignedAt = DateTime.UtcNow;
+                    previousHistory.UnassignedAt = DateTime.Now;
                 }
 
                 // Aktualne przypisanie
@@ -81,7 +81,7 @@ namespace MES_F1.Controllers
                     WorkerId = worker.WorkerId,
                     TeamId = model.TeamId,
                     TeamRoleId = model.TeamRoleId,
-                    AssignedAt = DateTime.UtcNow
+                    AssignedAt = DateTime.Now
                 });
 
                 await _context.SaveChangesAsync();

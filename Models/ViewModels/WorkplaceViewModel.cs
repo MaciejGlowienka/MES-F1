@@ -8,7 +8,7 @@ namespace MES_F1.Models.ViewModels
         public ProductionTask ProductionTask { get; set; }
         public List<WorkSession> WorkSessions { get; set; } = new();
         public WorkSession? CurrentSession { get; set; }
-        public List<Worker> WorkersDuringTask { get; set; } = new();
+        public List<WorkerWithRoleViewModel> WorkersDuringTask { get; set; } = new();
         public bool OnlyForView { get; set; } = false;
     }
 }
