@@ -15,14 +15,6 @@ namespace MES_F1.Models
 
         public ApplicationUser? User { get; set; }
 
-     
-        public int? TeamId { get; set; }
 
-        public Team Team { get; set; }
-
-
-        public int? TeamRoleId { get; set; }
-
-        public TeamRole TeamRole { get; set; }
     }
 }

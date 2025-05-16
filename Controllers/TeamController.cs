@@ -27,10 +27,22 @@ namespace MES_F1.Controllers
         [Route("Team/TeamAssign")]
         public async Task<IActionResult> TeamAssign(int? teamId)
         {
+
+            var allWorkers = await _context.Workers.ToListAsync();
+
+            var assignedWorkerIds = await _context.WorkerTeamHistories
+                .Where(h => h.UnassignedAt == null)
+                .Select(h => h.WorkerId)
+                .ToListAsync();
+
+            var availableWorkers = allWorkers
+                .Where(w => !assignedWorkerIds.Contains(w.WorkerId))
+                .ToList();
+
             var viewModel = new TeamAssignPageViewModel
             {
                 Teams = await _context.Teams.Where(t => !t.IsArchived).ToListAsync(),
-                AvailableWorkers = await _context.Workers.Where(w => w.TeamId == null).ToListAsync(),
+                AvailableWorkers = availableWorkers,
                 TeamRoles = await _context.TeamRoles.ToListAsync()
             };
 
@@ -72,8 +84,8 @@ namespace MES_F1.Controllers
                 }
 
                 // Aktualne przypisanie
-                worker.TeamId = model.TeamId;
-                worker.TeamRoleId = model.TeamRoleId;
+                //worker.TeamId = model.TeamId;
+                //worker.TeamRoleId = model.TeamRoleId;
 
                 // Nowy wpis do historii
                 _context.WorkerTeamHistories.Add(new WorkerTeamHistory
@@ -113,8 +125,8 @@ namespace MES_F1.Controllers
                 {
                     history.UnassignedAt = DateTime.UtcNow;
                 }
-                worker.TeamId = null;
-                worker.TeamRoleId = null;
+                //worker.TeamId = null;
+                //worker.TeamRoleId = null;
                 await _context.SaveChangesAsync();
             }
 
@@ -130,7 +142,10 @@ namespace MES_F1.Controllers
 
             team.IsArchived = true;
 
-            var workers = await _context.Workers.Where(w => w.TeamId == team.TeamId).ToListAsync();
+            var workers = await _context.WorkerTeamHistories
+                .Where(h => h.TeamId == team.TeamId && h.UnassignedAt == null)
+                .Select(h => h.Worker)
+                .ToListAsync();
 
             foreach (var worker in workers)
             {
@@ -143,9 +158,7 @@ namespace MES_F1.Controllers
                     history.UnassignedAt = DateTime.UtcNow;
                 }
 
-                worker.TeamId = null;
-                worker.TeamRoleId = null;
-            }
+            };
 
             await _context.SaveChangesAsync();
 
@@ -156,16 +169,18 @@ namespace MES_F1.Controllers
         [Authorize(Roles = "Director,Admin")]
         private async Task<List<WorkerWithRoleViewModel>> GetWorkerWithRolesAsync(int teamId)
         {
-            return await _context.Workers
-                .Where(w => w.TeamId == teamId)
-                .Select(w => new WorkerWithRoleViewModel
-                {
-                    WorkerId = w.WorkerId,
-                    WorkerName = w.WorkerName,
-                    RoleId = w.TeamRoleId,
-                    RoleName = w.TeamRole != null ? w.TeamRole.RoleName : "Brak roli"
-                })
-                .ToListAsync();
+            return await _context.WorkerTeamHistories
+                    .Include(h => h.Worker)
+                    .Include(h => h.TeamRole)
+                    .Where(h => h.TeamId == teamId && h.UnassignedAt == null)
+                    .Select(h => new WorkerWithRoleViewModel
+                    {
+                        WorkerId = h.Worker.WorkerId,
+                        WorkerName = h.Worker.WorkerName,
+                        RoleId = h.TeamRoleId,
+                        RoleName = h.TeamRole != null ? h.TeamRole.RoleName : "Brak roli"
+                    })
+                    .ToListAsync();
         }
 
         [Authorize(Roles = "Director,Admin")]

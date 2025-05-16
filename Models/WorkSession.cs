@@ -10,8 +10,6 @@ namespace MES_F1.Models
         public int ProductionTaskId { get; set; }
         public ProductionTask ProductionTask { get; set; }
 
-        public int TeamId { get; set; }
-        public Team Team { get; set; }
 
         public DateTime StartTime { get; set; }
 

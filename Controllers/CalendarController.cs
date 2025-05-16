@@ -30,7 +30,6 @@ namespace MES_F1.Controllers
             var userId = _userManager.GetUserId(User);
 
             var worker = await _context.Workers
-                .Include(w => w.Team)
                 .FirstOrDefaultAsync(w => w.AccountId == userId);
 
             if (worker == null)
@@ -38,9 +37,14 @@ namespace MES_F1.Controllers
                 return Unauthorized();
             }
 
+            var activeAssignment = await _context.WorkerTeamHistories
+                .Where(h => h.WorkerId == worker.WorkerId && h.UnassignedAt == null)
+                .OrderByDescending(h => h.AssignedAt)
+                .FirstOrDefaultAsync();
+
             var model = new CalendarViewModel
             {
-                TeamId = worker.TeamId
+                TeamId = activeAssignment?.TeamId
             };
 
 

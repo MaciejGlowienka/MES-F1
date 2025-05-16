@@ -333,7 +333,7 @@ namespace MES_F1.Controllers
         {
             var sessions = await _context.WorkSessions
                 .Include(ws => ws.ProductionTask)
-                .Include(ws => ws.Team)
+                .ThenInclude(pt => pt.Team)
                 .Where(ws => ws.ProductionTask.ProductionId == productionId)
                 .ToListAsync();
 
@@ -351,7 +351,7 @@ namespace MES_F1.Controllers
 
                 return new
                 {
-                    title = $"{ws.ProductionTask.TaskName} ({ws.Team?.TeamName ?? "Team"})",
+                    title = $"{ws.ProductionTask.TaskName} ({ws.ProductionTask.Team?.TeamName ?? "Team"})",
                     start = ws.StartTime.ToString("s"),
                     end = ws.EndTime?.ToString("s"),
                     color = colorMap[ws.ProductionTaskId]
@@ -458,7 +458,6 @@ namespace MES_F1.Controllers
             var newSession = new WorkSession
             {
                 ProductionTaskId = taskId,
-                TeamId = task.TeamId.Value,
                 StartTime = DateTime.Now
             };
 

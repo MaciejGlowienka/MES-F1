@@ -170,9 +170,7 @@ namespace MES_F1.Areas.Identity.Pages.Account
                         var newWorker = new Worker
                         {
                             WorkerName = $"{Input.Name} {Input.Surname}",
-                            AccountId = user.Id,
-                            TeamId = null,
-                            TeamRoleId = null
+                            AccountId = user.Id
                         };
 
                         _context.Workers.Add(newWorker);

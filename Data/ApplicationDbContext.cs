@@ -37,17 +37,17 @@ namespace MES_F1.Data
                 .HasForeignKey<Worker>(w => w.AccountId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder.Entity<Worker>()
-                .HasOne(w => w.Team)
-                .WithMany()
-                .HasForeignKey(w => w.TeamId)
-                .OnDelete(DeleteBehavior.Cascade);
+            //builder.Entity<Worker>()
+            //    .HasOne(w => w.Team)
+            //    .WithMany()
+            //    .HasForeignKey(w => w.TeamId)
+            //    .OnDelete(DeleteBehavior.Cascade);
 
-            builder.Entity<Worker>()
-                .HasOne(w => w.TeamRole)
-                .WithMany()
-                .HasForeignKey(w => w.TeamRoleId)
-                .OnDelete(DeleteBehavior.Cascade);
+            //builder.Entity<Worker>()
+            //    .HasOne(w => w.TeamRole)
+            //    .WithMany()
+            //    .HasForeignKey(w => w.TeamRoleId)
+            //    .OnDelete(DeleteBehavior.Cascade);
 
 
             builder.Entity<WorkerTeamHistory>()
@@ -164,11 +164,11 @@ namespace MES_F1.Data
                 .HasForeignKey(ws => ws.ProductionTaskId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            builder.Entity<WorkSession>()
-                .HasOne(ws => ws.Team)
-                .WithMany()
-                .HasForeignKey(ws => ws.TeamId)
-                .OnDelete(DeleteBehavior.Restrict);
+            //builder.Entity<WorkSession>()
+            //    .HasOne(ws => ws.Team)
+            //    .WithMany()
+            //    .HasForeignKey(ws => ws.TeamId)
+            //    .OnDelete(DeleteBehavior.Restrict);
 
 
         builder.Entity<IdentityRole>().HasData(
