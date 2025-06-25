@@ -10,7 +10,7 @@ namespace MES_F1.Models.ViewModels
         [Required]
         public string TaskName { get; set; }
 
-        [Required(ErrorMessage = "Wybierz zespół.")]
+        [Required(ErrorMessage = "Choose team.")]
         public int? TeamId { get; set; }
 
         [Required]

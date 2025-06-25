@@ -6,9 +6,9 @@ namespace MES_F1.Models.ViewModels
     {
         [Required]
         public int TeamId { get; set; }
-        [Required(ErrorMessage = "Wybierz pracownika.")]
+        [Required(ErrorMessage = "Choose worker.")]
         public int WorkerId { get; set; }
-        [Required(ErrorMessage = "Wybierz rolę.")]
+        [Required(ErrorMessage = "Choose role.")]
         public int TeamRoleId { get; set; }
     }
 }

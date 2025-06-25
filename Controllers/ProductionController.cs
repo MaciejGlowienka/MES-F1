@@ -47,7 +47,7 @@ namespace MES_F1.Controllers
 
             if (instruction == null)
             {
-                return NotFound("Nie znaleziono instrukcji.");
+                return NotFound("Instruction not found.");
             }
 
             var prod = new Production()
@@ -327,7 +327,7 @@ namespace MES_F1.Controllers
                         RoleId = wth.TeamRoleId,
                         RoleName = wth.TeamRole.RoleName
                     })
-                    .DistinctBy(w => w.WorkerId) // wymaga: using System.Linq;
+                    .DistinctBy(w => w.WorkerId)
                     .ToList(),
                 OnlyForView = onlyForView
             };

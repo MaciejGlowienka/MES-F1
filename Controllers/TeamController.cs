@@ -98,12 +98,6 @@ namespace MES_F1.Controllers
         }
 
 
-        //[Authorize(Roles = "Director,Admin")]
-        //[HttpPost]
-        //public IActionResult TeamDisplay(int TeamId)
-        //{
-        //    return RedirectToAction("TeamAssign", new { TeamId });
-        //}
 
         [Authorize(Roles = "Director,Admin")]
         [HttpPost]
