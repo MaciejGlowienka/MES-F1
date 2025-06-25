@@ -15,7 +15,7 @@
     events: []
             });
 
-    fetch('/Production/GetProductionWorkSessions?productionId=@Model.ProductionId')
+        fetch('/Calendar/GetProductionWorkSessions?productionId=@Model.ProductionId')
                 .then(response => response.json())
                 .then(data => {
         calendar.addEventSource(data);

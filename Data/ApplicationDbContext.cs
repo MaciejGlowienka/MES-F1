@@ -24,7 +24,6 @@ namespace MES_F1.Data
         public DbSet<InstructionSteps> InstructionSteps { get; set; }
         public DbSet<Machine> Machines { get; set; }
         public DbSet<WorkSession> WorkSessions { get; set; }
-
         public DbSet<WorkerTeamHistory> WorkerTeamHistories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -36,19 +35,6 @@ namespace MES_F1.Data
                 .WithOne()
                 .HasForeignKey<Worker>(w => w.AccountId)
                 .OnDelete(DeleteBehavior.Restrict);
-
-            //builder.Entity<Worker>()
-            //    .HasOne(w => w.Team)
-            //    .WithMany()
-            //    .HasForeignKey(w => w.TeamId)
-            //    .OnDelete(DeleteBehavior.Cascade);
-
-            //builder.Entity<Worker>()
-            //    .HasOne(w => w.TeamRole)
-            //    .WithMany()
-            //    .HasForeignKey(w => w.TeamRoleId)
-            //    .OnDelete(DeleteBehavior.Cascade);
-
 
             builder.Entity<WorkerTeamHistory>()
                 .HasOne(wth => wth.Worker)
@@ -163,12 +149,6 @@ namespace MES_F1.Data
                 .WithMany()
                 .HasForeignKey(ws => ws.ProductionTaskId)
                 .OnDelete(DeleteBehavior.Cascade);
-
-            //builder.Entity<WorkSession>()
-            //    .HasOne(ws => ws.Team)
-            //    .WithMany()
-            //    .HasForeignKey(ws => ws.TeamId)
-            //    .OnDelete(DeleteBehavior.Restrict);
 
 
         builder.Entity<IdentityRole>().HasData(

@@ -9,22 +9,35 @@
     
 </head>
 <body>
-    @{
-        ViewData["Title"] = "Your tasks";
-    }
 
-    @if (Model.TeamId == null)
-    {
-        <h4>You are not assigned to any team. Contact your director</h4>
-    }
-    else
-    {
-        <div id="calendarContainer" data-team-id="@Model.TeamId" style="margin-top: 30px;">
-            <h4>Weekly Task Schedule</h4>
-            <div id="calendar" style="max-width: 100%; height: 600px;"></div>
-        </div>
-    }
+@if (Model.IsAdmin)
 
-    <script src="~/js/taskEdit.js"></script>
+
+{
+    <form method="get" asp-controller="Calendar" asp-action="CalendarView">
+        <label asp-for="TeamId">Select a team:</label>
+            <select asp-for="TeamId" class="form-control" onchange="this.form.submit()">
+            <option value="">-- Select a team --</option>
+            @foreach (var team in Model.Teams)
+            {
+                <option value="@team.TeamId">@team.TeamName</option>
+            }
+        </select>
+    </form>
+}
+
+@if (Model.TeamId == null)
+{
+    <h4>You are not assigned to any team. Contact your director.</h4>
+}
+else
+{
+    <div id="calendarContainer" data-team-id="@Model.TeamId" style="margin-top: 30px;">
+        <h4>Weekly Task Schedule</h4>
+        <div id="calendar" style="max-width: 100%; height: 600px;"></div>
+    </div>
+}
+
+<script src="~/js/taskEdit.js"></script>
 
 </body>

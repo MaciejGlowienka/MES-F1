@@ -55,7 +55,7 @@
 });
 
 function loadTeamTasks(teamId) {
-    fetch(`/Production/GetTeamTasks?teamId=${teamId}`)
+    fetch(`/Calendar/GetTeamTasks?teamId=${teamId}`)
         .then(response => response.json())
         .then(data => {
             const taskList = document.getElementById("taskList");
@@ -84,7 +84,7 @@ function loadTeamTasks(teamId) {
 }
 
 function loadCalendar(teamId) {
-    fetch(`/Production/GetTeamTasksForCalendar?teamId=${teamId}`)
+    fetch(`/Calendar/GetTeamTasksForCalendar?teamId=${teamId}`)
         .then(response => response.json())
         .then(data => {
             const calendarEl = document.getElementById("calendar");

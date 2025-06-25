@@ -1,6 +1,6 @@
 ﻿namespace MES_F1.Models.ViewModels
 {
-    public class ProductionIndexViewModel
+    public class ProductionInitViewModel
     {
         public List<Instruction> Instructions { get; set; }
 

@@ -28,9 +28,9 @@ namespace MES_F1.Controllers
         }
 
         [Authorize(Roles = "Director,Admin")]
-        public IActionResult Index(int? instructionId = null)
+        public IActionResult ProductionInit(int? instructionId = null)
         {
-            var model = new ProductionIndexViewModel
+            var model = new ProductionInitViewModel
             {
                 Instructions = _context.Instructions.ToList(),
                 InstructionId = instructionId
@@ -40,7 +40,7 @@ namespace MES_F1.Controllers
 
         [Authorize(Roles = "Director,Admin")]
         [HttpPost]
-        public async Task<IActionResult> ProductionCreate(ProductionIndexViewModel model)
+        public async Task<IActionResult> ProductionCreate(ProductionInitViewModel model)
         {
 
             var instruction = await _context.Instructions.FirstOrDefaultAsync(w => w.InstructionId == model.InstructionId);
@@ -138,45 +138,11 @@ namespace MES_F1.Controllers
             prod.State = State;
             await _context.SaveChangesAsync();
 
+            TempData["SuccessMessage"] = "Production state has been changed.";
             return RedirectToAction("ProductionList", new { prod.State });
         }
 
 
-        [HttpGet]
-        public async Task<IActionResult> GetTeamTasks(int teamId)
-        {
-            var teamTasks = await _context.ProductionTasks
-                .Where(t => t.TeamId == teamId && 
-                            t.PlannedStartTime.HasValue && 
-                            t.PlannedEndTime.HasValue && 
-                            t.PlannedEndTime > DateTime.Now)
-                .Select(t => new
-                {
-                    t.TaskName,
-                    PlannedStartTime = t.PlannedStartTime.HasValue ? t.PlannedStartTime.Value.ToString("yyyy-MM-ddTHH:mm:ss") : null,
-                    PlannedEndTime = t.PlannedEndTime.HasValue ? t.PlannedEndTime.Value.ToString("yyyy-MM-ddTHH:mm:ss") : null
-                })
-                .ToListAsync();
-
-            return Json(teamTasks);
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetTeamTasksForCalendar(int teamId)
-        {
-            var tasks = await _context.ProductionTasks
-                .Where(t => t.TeamId == teamId && t.PlannedStartTime.HasValue && t.PlannedEndTime.HasValue)
-                .Select(t => new {
-                    id = t.ProductionTaskId,
-                    title = t.TaskName,
-                    start = t.PlannedStartTime.Value.ToString("s"),
-                    end = t.PlannedEndTime.Value.ToString("s"),
-                    isCompleted = t.ActualEndTime.HasValue
-                })
-                .ToListAsync();
-
-            return Json(tasks);
-        }
 
         [Authorize(Roles = "Director,Admin")]
         [HttpPost]
@@ -231,7 +197,7 @@ namespace MES_F1.Controllers
                 return NotFound();
             }
 
-            // --- Sprawdzenie kolizji z poprzednim taskiem ---
+            
             var previousTask = await _context.ProductionTasks.FirstOrDefaultAsync(t =>
                 t.ProductionId == task.ProductionId &&
                 t.InstructionStep == task.InstructionStep - 1);
@@ -244,7 +210,7 @@ namespace MES_F1.Controllers
                 }
             }
 
-            // --- Sprawdzenie kolizji z następnym taskiem ---
+            
             var nextTask = await _context.ProductionTasks.FirstOrDefaultAsync(t =>
                 t.ProductionId == task.ProductionId &&
                 t.InstructionStep == task.InstructionStep + 1);
@@ -257,7 +223,7 @@ namespace MES_F1.Controllers
                 }
             }
 
-            // --- Sprawdzenie kolizji z innymi taskami tego samego zespołu ---
+            
             if (model.TeamId.HasValue && model.PlannedStartTime.HasValue && model.PlannedEndTime.HasValue)
             {
                 var overlappingTasks = await _context.ProductionTasks
@@ -267,9 +233,9 @@ namespace MES_F1.Controllers
                         t.PlannedStartTime.HasValue &&
                         t.PlannedEndTime.HasValue &&
                         (
-                            (model.PlannedStartTime < t.PlannedEndTime && model.PlannedStartTime >= t.PlannedStartTime) || // start w środku
-                            (model.PlannedEndTime > t.PlannedStartTime && model.PlannedEndTime <= t.PlannedEndTime) ||     // koniec w środku
-                            (model.PlannedStartTime <= t.PlannedStartTime && model.PlannedEndTime >= t.PlannedEndTime)    // obejmuje inny
+                            (model.PlannedStartTime < t.PlannedEndTime && model.PlannedStartTime >= t.PlannedStartTime) || 
+                            (model.PlannedEndTime > t.PlannedStartTime && model.PlannedEndTime <= t.PlannedEndTime) ||     
+                            (model.PlannedStartTime <= t.PlannedStartTime && model.PlannedEndTime >= t.PlannedEndTime)   
                         )
                     ).ToListAsync();
 
@@ -285,7 +251,7 @@ namespace MES_F1.Controllers
                 ModelState.AddModelError("", "Cannot  schedule tasks for a time that has already passed");
             }
 
-            // --- Jeśli są błędy, wróć do widoku z komunikatami ---
+            
             if (!ModelState.IsValid)
             {
                 model.Teams = await _context.Teams.ToListAsync();
@@ -295,7 +261,7 @@ namespace MES_F1.Controllers
                 return View("TaskEdit", model);
             }
 
-            // --- Zapis taska ---
+            
             task.TeamId = model.TeamId;
             task.MachineId = model.MachineId;
             task.PlannedStartTime = model.PlannedStartTime;
@@ -307,59 +273,7 @@ namespace MES_F1.Controllers
             return RedirectToAction("ProductionSetup", new { productionId = task.ProductionId });
         }
 
-        //[Authorize(Roles = "Director,Admin")]
-        //[HttpPost]
-        //public async Task<IActionResult> TaskEditSubmit(TaskEditViewModel model)
-        //{
-        //    var task = await _context.ProductionTasks.FirstOrDefaultAsync(t => t.ProductionTaskId == model.TaskId);
 
-        //    if (task == null)
-        //        return NotFound();
-
-        //    task.TeamId = model.TeamId;
-        //    task.MachineId = model.MachineId;
-        //    task.PlannedStartTime = model.PlannedStartTime;
-        //    task.PlannedEndTime = model.PlannedEndTime;
-
-        //    _context.ProductionTasks.Update(task);
-        //    await _context.SaveChangesAsync();
-
-        //    return RedirectToAction("ProductionSetup", new { productionId = task.ProductionId });
-        //}
-
-        [Authorize(Roles = "Worker,Director,Admin")]
-        [HttpGet]
-        public async Task<IActionResult> GetProductionWorkSessions(int productionId)
-        {
-            var sessions = await _context.WorkSessions
-                .Include(ws => ws.ProductionTask)
-                .ThenInclude(pt => pt.Team)
-                .Where(ws => ws.ProductionTask.ProductionId == productionId)
-                .ToListAsync();
-
-            var colors = new[] { "#e74c3c", "#3498db", "#2ecc71", "#f1c40f", "#9b59b6", "#1abc9c" };
-            var colorMap = new Dictionary<int, string>();
-            int colorIndex = 0;
-
-            var events = sessions.Select(ws =>
-            {
-                if (!colorMap.ContainsKey(ws.ProductionTaskId))
-                {
-                    colorMap[ws.ProductionTaskId] = colors[colorIndex % colors.Length];
-                    colorIndex++;
-                }
-
-                return new
-                {
-                    title = $"{ws.ProductionTask.TaskName} ({ws.ProductionTask.Team?.TeamName ?? "Team"})",
-                    start = ws.StartTime.ToString("s"),
-                    end = ws.EndTime?.ToString("s"),
-                    color = colorMap[ws.ProductionTaskId]
-                };
-            });
-
-            return Json(events);
-        }
 
         [Authorize(Roles = "Worker,Director,Admin")]
         private async Task<WorkplaceViewModel?> BuildWorkplaceViewModelAsync(int taskId, bool onlyForView = false)

@@ -54,7 +54,7 @@ namespace MES_F1.Controllers
                     viewModel.TeamName = team.TeamName;
                     viewModel.TeamWorkScope = EnumHelper.GetDescription(team.TeamWorkScope);
                     viewModel.SelectedTeamId = team.TeamId;
-                    viewModel.WorkersWithRoles = await GetWorkerWithRolesAsync(team.TeamId);
+                    viewModel.WorkersWithRoles = await GetWorkerWithRoles(team.TeamId);
                 }
             }
 
@@ -67,7 +67,6 @@ namespace MES_F1.Controllers
         {
             if (!ModelState.IsValid)
             {
-                // Możesz przekazać TeamId jako route param do powrotu na stronę TeamAssign
                 return RedirectToAction("TeamAssign", new { teamId = model.TeamId });
             }
 
@@ -83,11 +82,7 @@ namespace MES_F1.Controllers
                     previousHistory.UnassignedAt = DateTime.Now;
                 }
 
-                // Aktualne przypisanie
-                //worker.TeamId = model.TeamId;
-                //worker.TeamRoleId = model.TeamRoleId;
 
-                // Nowy wpis do historii
                 _context.WorkerTeamHistories.Add(new WorkerTeamHistory
                 {
                     WorkerId = worker.WorkerId,
@@ -103,12 +98,12 @@ namespace MES_F1.Controllers
         }
 
 
-        [Authorize(Roles = "Director,Admin")]
-        [HttpPost]
-        public IActionResult TeamDisplay(int TeamId)
-        {
-            return RedirectToAction("TeamAssign", new { TeamId });
-        }
+        //[Authorize(Roles = "Director,Admin")]
+        //[HttpPost]
+        //public IActionResult TeamDisplay(int TeamId)
+        //{
+        //    return RedirectToAction("TeamAssign", new { TeamId });
+        //}
 
         [Authorize(Roles = "Director,Admin")]
         [HttpPost]
@@ -125,8 +120,7 @@ namespace MES_F1.Controllers
                 {
                     history.UnassignedAt = DateTime.UtcNow;
                 }
-                //worker.TeamId = null;
-                //worker.TeamRoleId = null;
+
                 await _context.SaveChangesAsync();
             }
 
@@ -167,7 +161,7 @@ namespace MES_F1.Controllers
         }
 
         [Authorize(Roles = "Director,Admin")]
-        private async Task<List<WorkerWithRoleViewModel>> GetWorkerWithRolesAsync(int teamId)
+        private async Task<List<WorkerWithRoleViewModel>> GetWorkerWithRoles(int teamId)
         {
             return await _context.WorkerTeamHistories
                     .Include(h => h.Worker)

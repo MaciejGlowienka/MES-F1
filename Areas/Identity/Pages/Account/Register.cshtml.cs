@@ -26,6 +26,7 @@ using Microsoft.Extensions.Logging;
 
 namespace MES_F1.Areas.Identity.Pages.Account
 {
+    [Authorize(Roles = "Admin")]
     public class RegisterModel : PageModel
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
